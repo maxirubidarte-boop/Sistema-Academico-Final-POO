@@ -6,112 +6,68 @@ import java.awt.event.ActionListener;
 
 public class VentanaPrincipalUI extends JFrame {
 
-    // Componentes del Modo Lista
-    private JTable tablaDatos;
-    private JButton btnAgregar, btnEditar, btnEliminar;
-    private JPanel panelLista;
-
-    // Componentes del Modo Formulario
-    private JPanel panelFormulario;
-    private JTextField txtNombre, txtDni, txtLegajo;
-    private JButton btnGuardar, btnCancelar;
-
-    // Contenedor principal que intercambia las pantallas
-    private JPanel contenedorDinamico;
-    private CardLayout navegador;
+    private JPanel contenedorCentral;
+    private JButton btnSeccionAlumnos, btnSeccionMaterias, btnSeccionCarreras, btnSeccionPlanes;
 
     public VentanaPrincipalUI() {
-        setTitle("Sistema Académico UNTDF - Control de Consola Única");
-        setSize(600, 400);
+        // Configuración básica de la ventana de Swing
+        setTitle("Sistema Académico UNTDF - Panel de Control Profesional");
+        setSize(1050, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(null); // La centra en la pantalla automáticamente
+        setLayout(new BorderLayout());
 
-        navegador = new CardLayout();
-        contenedorDinamico = new JPanel(navegador);
+        // 📌 1. BARRA SUPERIOR DE MENÚ (Estilo Dashboard)
+        JPanel panelMenu = new JPanel(new GridLayout(1, 4, 10, 10));
+        panelMenu.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        panelMenu.setBackground(new Color(240, 242, 245)); // Un gris moderno sutil
 
-        // Construimos las dos pantallas
-        armarPanelLista();
-        armarPanelFormulario();
+        btnSeccionAlumnos = new JButton("Sección Alumnos");
+        btnSeccionMaterias = new JButton("Sección Materias");
+        btnSeccionCarreras = new JButton("Sección Carreras");
+        btnSeccionPlanes = new JButton("Planes y Notas");
 
-        // Las agregamos al contenedor con una clave en String para llamarlas
-        contenedorDinamico.add(panelLista, "LISTA");
-        contenedorDinamico.add(panelFormulario, "FORMULARIO");
+        // Diseños simples para quitar el estilo nativo tosco
+        btnSeccionAlumnos.setFocusPainted(false);
+        btnSeccionMaterias.setFocusPainted(false);
+        btnSeccionCarreras.setFocusPainted(false);
+        btnSeccionPlanes.setFocusPainted(false);
 
-        add(contenedorDinamico);
+        panelMenu.add(btnSeccionAlumnos);
+        panelMenu.add(btnSeccionMaterias);
+        panelMenu.add(btnSeccionCarreras);
+        panelMenu.add(btnSeccionPlanes);
+        add(panelMenu, BorderLayout.NORTH);
 
-        // Arranca mostrando la lista con los 3 botones estándar
-        mostrarModoLista();
+        // 📌 2. CONTENEDOR CENTRAL DINÁMICO
+        contenedorCentral = new JPanel(new BorderLayout());
+        contenedorCentral.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        // Pantalla de bienvenida por defecto
+        JLabel lblBienvenida = new JLabel("Bienvenido al Sistema Académico. Seleccione una opción del menú superior.", SwingConstants.CENTER);
+        lblBienvenida.setFont(new Font("Arial", Font.ITALIC, 14));
+        contenedorCentral.add(lblBienvenida, BorderLayout.CENTER);
+
+        add(contenedorCentral, BorderLayout.CENTER);
     }
 
-    private void armarPanelLista() {
-        panelLista = new JPanel(new BorderLayout());
-
-        // Tabla simple de muestra
-        String[] columnas = {"Nombre", "Legajo", "DNI"};
-        String[][] datosMuestra = {{"Maxi Rubidarte", "4001", "45123456"}};
-        tablaDatos = new JTable(datosMuestra, columnas);
-        panelLista.add(new JScrollPane(tablaDatos), BorderLayout.CENTER);
-
-        // Botones ABM estándar
-        JPanel panelBotones = new JPanel();
-        btnAgregar = new JButton("Agregar");
-        btnEditar = new JButton("Editar");
-        btnEliminar = new JButton("Eliminar");
-
-        panelBotones.add(btnAgregar);
-        panelBotones.add(btnEditar);
-        panelBotones.add(btnEliminar);
-        panelLista.add(panelBotones, BorderLayout.SOUTH);
+    /**
+     * El método estrella: Limpia el centro de la pantalla e inyecta el panel que queramos en caliente.
+     */
+    public void setPanelCentral(JPanel nuevoPanel) {
+        contenedorCentral.removeAll();       // Borra lo que había (la bienvenida u otra sección)
+        contenedorCentral.add(nuevoPanel, BorderLayout.CENTER); // Pega el panel nuevo (ej: Alumnos)
+        contenedorCentral.revalidate();      // Le dice a Swing que recalcule los componentes
+        contenedorCentral.repaint();         // Re-dibuja visualmente la pantalla
     }
 
-    private void armarPanelFormulario() {
-        panelFormulario = new JPanel(new GridLayout(4, 2, 10, 10));
-
-        panelFormulario.add(new JLabel("  Nombre:"));
-        txtNombre = new JTextField();
-        panelFormulario.add(txtNombre);
-
-        panelFormulario.add(new JLabel("  DNI:"));
-        txtDni = new JTextField();
-        panelFormulario.add(txtDni);
-
-        panelFormulario.add(new JLabel("  Legajo:"));
-        txtLegajo = new JTextField();
-        panelFormulario.add(txtLegajo);
-
-        btnGuardar = new JButton("Guardar");
-        btnCancelar = new JButton("Cancelar");
-        panelFormulario.add(btnGuardar);
-        panelFormulario.add(btnCancelar);
-    }
-
-    // Métodos de navegación que va a usar el Controlador
-    public void mostrarModoFormulario() {
-        limpiarFormulario();
-        navegador.show(contenedorDinamico, "FORMULARIO");
-    }
-
-    public void mostrarModoLista() {
-        navegador.show(contenedorDinamico, "LISTA");
-    }
-
-    public void limpiarFormulario() {
-        txtNombre.setText("");
-        txtDni.setText("");
-        txtLegajo.setText("");
-    }
-
-    // GETTERS de datos para el controlador
-    public String getNombreIngresado() { return txtNombre.getText(); }
-    public String getDniIngresado() { return txtDni.getText(); }
-    public String getLegajoIngresado() { return txtLegajo.getText(); }
-
-    // Conectores de eventos (Los escucha el controlador)
-    public void escucharBotones(ActionListener listener) {
-        btnAgregar.addActionListener(listener);
-        btnEditar.addActionListener(listener);
-        btnEliminar.addActionListener(listener);
-        btnGuardar.addActionListener(listener);
-        btnCancelar.addActionListener(listener);
+    /**
+     * Registra al Controlador Principal para escuchar el menú global
+     */
+    public void escucharMenu(ActionListener listener) {
+        btnSeccionAlumnos.addActionListener(listener);
+        btnSeccionMaterias.addActionListener(listener);
+        btnSeccionCarreras.addActionListener(listener);
+        btnSeccionPlanes.addActionListener(listener);
     }
 }

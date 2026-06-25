@@ -196,6 +196,23 @@ public class DemoSistema {
         System.out.println("\n==================================================================");
         System.out.println("🏆 CONSOLE SUPREME TEST: PASADO CON ÉXITO — TODOS LOS SISTEMAS GREEN");
         System.out.println("==================================================================");
+
+        // ==================================================================
+        // 🚀 NUEVA SECCIÓN 3: ENCENDIDO DEL PANEL GRÁFICO PROFESIONAL
+        // ==================================================================
+        System.out.println("\n🖥️ [INTERFAZ] Abriendo Panel de Control Gráfico...");
+
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            // 1. Levantamos la Ventana Principal usando el modelo Singleton que ya tiene los datos
+            vista.VentanaPrincipalUI ventana = new vista.VentanaPrincipalUI();
+
+            // 2. Conectamos la ventana con el controlador principal
+            controlador.ControladorPrincipal controladorGlobal = new controlador.ControladorPrincipal(ventana, modelo);
+
+            // 3. Hacemos visible el software
+            ventana.setVisible(true);
+            System.out.println("✅ [INTERFAZ] Renderizado exitoso en pantalla.");
+        });
     }
 
     private static void mostrarAptas(Alumno a) {

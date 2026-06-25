@@ -1,63 +1,43 @@
 package controlador;
 
 import modelo.ModeloSistemaAcademico;
-import modelo.Alumno;
 import vista.VentanaPrincipalUI;
+import vista.PanelAlumnosUI;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JOptionPane;
 
 public class ControladorPrincipal implements ActionListener {
 
-    private VentanaPrincipalUI vista;
+    private VentanaPrincipalUI ventanaMadre;
     private ModeloSistemaAcademico modelo;
 
-    public ControladorPrincipal(VentanaPrincipalUI vista, ModeloSistemaAcademico modelo) {
-        this.vista = vista;
+    public ControladorPrincipal(VentanaPrincipalUI ventanaMadre, ModeloSistemaAcademico modelo) {
+        this.ventanaMadre = ventanaMadre;
         this.modelo = modelo;
 
-        // Le decimos a la vista que nosotros manejamos sus clics
-        this.vista.escucharBotones(this);
+        // Registramos este controlador para escuchar los 4 botones de arriba
+        this.ventanaMadre.escucharMenu(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         String comando = e.getActionCommand();
 
-        switch (comando) {
-            case "Agregar":
-                // Desaparece la lista, aparece el formulario
-                vista.mostrarModoFormulario();
-                break;
+        if (comando.equals("Sección Alumnos")) {
+            // 🎬 INYECCIÓN EN CALIENTE DE ALUMNOS
+            PanelAlumnosUI panelAlumnos = new PanelAlumnosUI();
+            ControladorAlumnos ctrlAlumnos = new ControladorAlumnos(panelAlumnos, modelo);
 
-            case "Cancelar":
-                // Vuelve atrás sin hacer nada
-                vista.mostrarModoLista();
-                break;
+            // Le encajamos el panel de alumnos en el centro a la ventana principal
+            ventanaMadre.setPanelCentral(panelAlumnos);
 
-            case "Guardar":
-                // 1. Extrae los datos de la vista
-                String nombre = vista.getNombreIngresado();
-                String dni = vista.getDniIngresado();
-                int legajo = Integer.parseInt(vista.getLegajoIngresado());
-
-                // 2. Impacta el modelo real que ya testeamos
-                Alumno nuevo = new Alumno(nombre, legajo, dni);
-                modelo.registrarAlumnoEnSistema(nuevo);
-
-                System.out.println("✅ [MVC] Alumno guardado en el modelo: " + nombre);
-
-                // 3. Redirige a la página anterior
-                vista.mostrarModoLista();
-                // (Acá meteríamos la recarga de la tabla real)
-                break;
-
-            case "Editar":
-                System.out.println("Presionó Editar");
-                break;
-
-            case "Eliminar":
-                System.out.println("Presionó Eliminar");
-                break;
+        } else if (comando.equals("Sección Materias") || comando.equals("Sección Carreras") || comando.equals("Planes y Notas")) {
+            // Cartelito temporal para las secciones vacías
+            JOptionPane.showMessageDialog(ventanaMadre,
+                    "La " + comando + " estará disponible en los próximos pasos.",
+                    "Módulo en construcción",
+                    JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }
