@@ -13,7 +13,7 @@ public class PanelMateriasUI extends JPanel {
     // Campos del formulario
     private JTextField txtCodigo;
     private JTextField txtNombre;
-    private JComboBox<String> comboFormato;
+    private JComboBox<String> comboCuatrimestre;
 
     // Botones de control (Lista y Formulario)
     private JButton btnAgregar;
@@ -45,11 +45,11 @@ public class PanelMateriasUI extends JPanel {
         // --- CENTRO: Tabla y Paginación ---
         JPanel panelContenedorTabla = new JPanel(new BorderLayout(5, 5));
 
-        String[] columnas = {"Código", "Nombre de Materia", "Formato Cursada"};
+        String[] columnas = {"Código", "Nombre de Materia", "Cuatrimestre"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // 🛡️ Evita que editen tipeando directo en la celda
+                return false; //  Evita que editen tipeando directo en la celda
             }
         };
 
@@ -117,13 +117,13 @@ public class PanelMateriasUI extends JPanel {
         gbc.gridx = 1; gbc.gridy = 2;
         panelFormulario.add(txtNombre, gbc);
 
-        // Fila 3: Combo Formato/Régimen
+        // Fila 3: Combo Cuatrimestre
         gbc.gridx = 0; gbc.gridy = 3;
-        panelFormulario.add(new JLabel("Formato:"), gbc);
-        String[] opcionesFormato = {"Materia", "Seminario", "Taller"};
-        comboFormato = new JComboBox<>(opcionesFormato);
+        panelFormulario.add(new JLabel("Cuatrimestre:"), gbc);
+        String[] opcionesFormato = {"1º Cuatrimestre", "2º Cuatrimestre", "3º Cuatrimestre", "4º Cuatrimestre", "5º Cuatrimestre", "6º Cuatrimestre"};
+        comboCuatrimestre = new JComboBox<>(opcionesFormato);
         gbc.gridx = 1; gbc.gridy = 3;
-        panelFormulario.add(comboFormato, gbc);
+        panelFormulario.add(comboCuatrimestre, gbc);
 
         // Fila 4: Botones Guardar/Cancelar (Metidos en un sub-panel para ir juntos)
         JPanel panelBotonesForm = new JPanel(new GridLayout(1, 2, 5, 0));
@@ -181,7 +181,7 @@ public class PanelMateriasUI extends JPanel {
     public DefaultTableModel getModeloTabla() { return modeloTabla; }
     public String getTxtCodigo() { return txtCodigo.getText().trim(); }
     public String getTxtNombre() { return txtNombre.getText().trim(); }
-    public String getFormatoSeleccionado() { return (String) comboFormato.getSelectedItem(); }
+    public Integer getCuatrimestreSeleccionado() {return comboCuatrimestre.getSelectedIndex() + 1;}
     public JButton getBtnAnterior() { return btnAnterior; }
     public JButton getBtnSiguiente() { return btnSiguiente; }
     public JLabel getLblPaginacion() { return lblPaginacion; }

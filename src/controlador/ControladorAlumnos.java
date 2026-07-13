@@ -222,7 +222,7 @@ public class ControladorAlumnos implements ActionListener {
         }
 
         //  VALIDACIÓN 2.2: Formato y longitud del DNI (Solo números, entre 7 y 8 dígitos)
-        //  VALIDACIÓN 2.2: Formato y longitud del DNI (Solo números, entre 7 y 8 dígitos)
+
         if (!dni.matches("^[0-9]{7,8}$")) {
             JOptionPane.showMessageDialog(vista,
                     "El DNI debe contener solo números y tener entre 7 y 8 dígitos (sin puntos ni espacios).",

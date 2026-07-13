@@ -408,9 +408,9 @@ public class ModeloSistemaAcademico {
     }
 
     //INSCRIBIR ALUMNOA MATERIA
-    public boolean inscribirAlumnoAMateria(String dni,String codigoMateria) {
+    public boolean inscribirAlumnoAMateria(String dni,String nombreMateria) {
         Alumno a = getAlumno(dni);
-        Materia m = materias.get(codigoMateria);
+        Materia m = materias.get(nombreMateria);
         if (a != null && m != null) {
             // Podés agregar aquí la validación de aptas antes de inscribir
             if (a.getMateriasAptasACursar().contains(m)) {
