@@ -22,7 +22,7 @@ public class ControladorAlumnos implements ActionListener {
 
     // Banderas de estado para el botón "Guardar"
     private boolean esAlta = true;
-    private boolean esInscripcion = false; // 🆕 Controla si el guardado es para una carrera
+    private boolean esInscripcion = false; //  Controla si el guardado es para una carrera
 
     public ControladorAlumnos(PanelAlumnosUI vista, ModeloSistemaAcademico modelo) {
         this.vista = vista;
@@ -212,7 +212,7 @@ public class ControladorAlumnos implements ActionListener {
             return;
         }
 
-        // 🛡️ VALIDACIÓN 2.1: Longitud y coherencia del Legajo (Mínimo 4 dígitos)
+        //  VALIDACIÓN 2.1: Longitud y coherencia del Legajo (Mínimo 4 dígitos)
         if (legajoStr.length() < 4 || legajo <= 0) {
             JOptionPane.showMessageDialog(vista,
                     "El número de Legajo no es válido.\nDebe tener al menos 4 dígitos (Ej: 4001).",
@@ -221,17 +221,17 @@ public class ControladorAlumnos implements ActionListener {
             return;
         }
 
-        // 🛡️ VALIDACIÓN 2.2: Formato y longitud del DNI (Solo números, entre 7 y 8 dígitos)
-        // 🛡️ VALIDACIÓN 2.2: Formato y longitud del DNI (Solo números, entre 7 y 8 dígitos)
+        //  VALIDACIÓN 2.2: Formato y longitud del DNI (Solo números, entre 7 y 8 dígitos)
+        //  VALIDACIÓN 2.2: Formato y longitud del DNI (Solo números, entre 7 y 8 dígitos)
         if (!dni.matches("^[0-9]{7,8}$")) {
             JOptionPane.showMessageDialog(vista,
                     "El DNI debe contener solo números y tener entre 7 y 8 dígitos (sin puntos ni espacios).",
                     "Error en DNI",
                     JOptionPane.ERROR_MESSAGE);
-            return; // 🛑 Frena el guardado
+            return; //  Frena el guardado
         }
 
-        // 🛡️ VALIDACIÓN 2.5: Que el nombre contenga SOLO letras y espacios
+        //  VALIDACIÓN 2.5: Que el nombre contenga SOLO letras y espacios
         // Usamos una expresión regular: ^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$
         // Esto significa: desde el inicio (^) hasta el final ($), solo letras con tildes, eñes y espacios.
         if (!nombre.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$")) {
@@ -239,7 +239,7 @@ public class ControladorAlumnos implements ActionListener {
                     "El nombre completo solo puede contener letras y espacios.\nNo se permiten números ni caracteres especiales.",
                     "Error en Nombre",
                     JOptionPane.ERROR_MESSAGE);
-            return; // 🛑 Frena el guardado
+            return; //  Frena el guardado
         }
 
         // 3. Controles de duplicados (solo en Altas)

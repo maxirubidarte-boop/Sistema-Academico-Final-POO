@@ -21,7 +21,7 @@ public class PanelAlumnosUI extends JPanel {
     // Componentes Modo FORMULARIO (Reutilizable)
     private JPanel panelFormulario;
     private JTextField txtNombre, txtDni, txtLegajo;
-    private JComboBox<String> comboCarreras; // 🆕 Desplegable dinámico
+    private JComboBox<String> comboCarreras; //  Desplegable dinámico
     private JLabel lblLegajoForm, lblCarreraForm; // Etiquetas dinámicas para ocultar/mostrar
     private JButton btnGuardar, btnCancelar;
     private JLabel lblTituloFormulario;
@@ -171,7 +171,7 @@ public class PanelAlumnosUI extends JPanel {
         restaurarComponentesFormulario();
         lblTituloFormulario.setText("Modificar Datos del Alumno");
         txtDni.setText(dni);
-        txtDni.setEditable(false); // 🔒 Bloqueado
+        txtDni.setEditable(false); // Bloqueado
         txtLegajo.setText(legajo);
         txtNombre.setText(nombre);
         navegador.show(contenedorDinamico, "FORMULARIO");

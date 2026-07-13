@@ -1,6 +1,7 @@
 package controlador;
 
 import modelo.ModeloSistemaAcademico;
+import vista.PanelMateriasUI;
 import vista.VentanaPrincipalUI;
 import vista.PanelAlumnosUI;
 import java.awt.event.ActionEvent;
@@ -24,20 +25,40 @@ public class ControladorPrincipal implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String comando = e.getActionCommand();
 
-        if (comando.equals("Sección Alumnos")) {
-            // 🎬 INYECCIÓN EN CALIENTE DE ALUMNOS
-            PanelAlumnosUI panelAlumnos = new PanelAlumnosUI();
-            ControladorAlumnos ctrlAlumnos = new ControladorAlumnos(panelAlumnos, modelo);
+        switch (comando) {
+            case "Sección Alumnos": // 💡 Corregido: Agregamos la tilde para que coincida con el botón
+                // 🎬 INYECCIÓN EN CALIENTE DE ALUMNOS
+                PanelAlumnosUI panelAlumnos = new PanelAlumnosUI();
+                ControladorAlumnos ctrlAlumnos = new ControladorAlumnos(panelAlumnos, modelo);
 
-            // Le encajamos el panel de alumnos en el centro a la ventana principal
-            ventanaMadre.setPanelCentral(panelAlumnos);
+                // Le encajamos el panel de alumnos en el centro a la ventana principal
+                ventanaMadre.setPanelCentral(panelAlumnos);
+                break;
 
-        } else if (comando.equals("Sección Materias") || comando.equals("Sección Carreras") || comando.equals("Planes y Notas")) {
-            // Cartelito temporal para las secciones vacías
-            JOptionPane.showMessageDialog(ventanaMadre,
-                    "La " + comando + " estará disponible en los próximos pasos.",
-                    "Módulo en construcción",
-                    JOptionPane.INFORMATION_MESSAGE);
+            case "Sección Materias":
+                // 🎬 INYECCIÓN EN CALIENTE DE MATERIAS
+                PanelMateriasUI panelMaterias = new PanelMateriasUI();
+                ControladorMaterias ctrlMaterias = new ControladorMaterias(panelMaterias, modelo); // 💡 Corregido: Se agregó el ';' faltante
+
+                // Le encajamos el panel de materias en el centro a la ventana principal
+                ventanaMadre.setPanelCentral(panelMaterias);
+                break;
+
+            case "Sección Carreras":
+                // Cartelito temporal para las secciones vacías
+                JOptionPane.showMessageDialog(ventanaMadre,
+                        "La " + comando + " estará disponible en los próximos pasos.",
+                        "Módulo en construcción",
+                        JOptionPane.INFORMATION_MESSAGE);
+                break;
+
+            case "Planes y Notas":
+                // Cartelito temporal para las secciones vacías
+                JOptionPane.showMessageDialog(ventanaMadre,
+                        "La " + comando + " estará disponible en los próximos pasos.",
+                        "Módulo en construcción",
+                        JOptionPane.INFORMATION_MESSAGE);
+                break;
         }
     }
 }

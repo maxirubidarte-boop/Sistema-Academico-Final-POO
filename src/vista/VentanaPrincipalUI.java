@@ -17,7 +17,7 @@ public class VentanaPrincipalUI extends JFrame {
         setLocationRelativeTo(null); // La centra en la pantalla automáticamente
         setLayout(new BorderLayout());
 
-        // 📌 1. BARRA SUPERIOR DE MENÚ (Estilo Dashboard)
+        //  1. BARRA SUPERIOR DE MENÚ (Estilo Dashboard)
         JPanel panelMenu = new JPanel(new GridLayout(1, 4, 10, 10));
         panelMenu.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         panelMenu.setBackground(new Color(240, 242, 245)); // Un gris moderno sutil
@@ -39,7 +39,7 @@ public class VentanaPrincipalUI extends JFrame {
         panelMenu.add(btnSeccionPlanes);
         add(panelMenu, BorderLayout.NORTH);
 
-        // 📌 2. CONTENEDOR CENTRAL DINÁMICO
+        //  2. CONTENEDOR CENTRAL DINÁMICO
         contenedorCentral = new JPanel(new BorderLayout());
         contenedorCentral.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
