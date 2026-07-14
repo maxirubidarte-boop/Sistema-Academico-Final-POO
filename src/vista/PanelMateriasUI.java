@@ -89,13 +89,17 @@ public class PanelMateriasUI extends JPanel {
         btnEditar = new JButton("Editar Materia");
         btnEditar.setFocusPainted(false);
         btnCorrelativas = new JButton("Correlativas");
+
         btnVolver = new JButton("Volver");
+        btnVolver.setVisible(false);
 
         panelBotonesAccion.add(btnAgregar);
         panelBotonesAccion.add(btnEliminar);
         panelBotonesAccion.add(btnEditar);
         panelBotonesAccion.add(btnCorrelativas);
         panelBotonesAccion.add(btnVolver);
+
+
 
         // Con un solo casillero vacío ya completamos las 6 filas del GridLayout
         panelBotonesAccion.add(new JLabel(""));
@@ -211,9 +215,28 @@ public class PanelMateriasUI extends JPanel {
         btnEditar.setVisible(false); // Ocultamos Editar porque acá no tiene sentido usarlo
         btnCorrelativas.setVisible(false);
         btnVolver.setVisible(true);
+        btnEliminar.setVisible(true);
 
         CardLayout cl = (CardLayout) panelDerechoContenedor.getLayout();
         cl.show(panelDerechoContenedor, "Botones");
+
+        tablaMaterias.setEnabled(true);
+    }
+
+    public void mostrarModoSeleccionCorrelativa(String nombreMateria) {
+        lblTituloModulo.setText("Materias disponibles para asignar a: " + nombreMateria);
+
+        // Cambiamos el texto del botón de agregar para que actúe como confirmación
+        btnAgregar.setText("Confirmar Selección");
+
+        // Ocultamos lo que no sirve en este sub-modo
+        btnEliminar.setVisible(false);
+        btnEditar.setVisible(false);
+        btnCorrelativas.setVisible(false);
+
+        // Dejamos únicamente el botón para confirmar y el de volver por si se arrepiente
+        btnAgregar.setVisible(true);
+        btnVolver.setVisible(true);
 
         tablaMaterias.setEnabled(true);
     }

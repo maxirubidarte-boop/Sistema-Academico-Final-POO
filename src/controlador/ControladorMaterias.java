@@ -2,11 +2,13 @@ package controlador;
 
 import modelo.Materia;
 import modelo.ModeloSistemaAcademico;
+import modelo.Prerrequisito;
 import vista.PanelMateriasUI;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -16,6 +18,11 @@ public class ControladorMaterias implements ActionListener {
     private ModeloSistemaAcademico modelo;
     // Bandera de estado para el botón "Guardar"
     private boolean esAlta = true;
+
+    // VARIABLES DE ESTADO PARA GESTIONAR CORRELATIVAS
+    private boolean enModoCorrelativas = false;
+    private Materia materiaSeleccionadaCorrelativas = null;
+    private boolean enModoSeleccionCorrelativa = false;
 
     // Variables para controlar la paginación de a 5 filas
     private int paginaActual = 1;
@@ -58,6 +65,21 @@ public class ControladorMaterias implements ActionListener {
                 break;
             case "Editar Materia":
                 this.editarMateria();
+                break;
+            case "Correlativas":
+                this.correlativas();
+                break;
+            case "Volver":
+                this.procesarVolver();
+                break;
+            case "Agregar Correlativa":
+                this.agregarCorrelativa();
+                break;
+            case "Eliminar Correlativa":
+                this.eliminarCorrelativa();
+                break;
+            case "Confirmar Selección":
+                this.confirmarSeleccionCorrelativa();
                 break;
         }
     }
@@ -165,6 +187,107 @@ public class ControladorMaterias implements ActionListener {
         this.actualizarTabla(); // Recargamos la tabla con los cambios frescos
     }
 
+    public void correlativas(){
+        int filaSeleccionada = vista.getTablaMaterias().getSelectedRow();
+
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(vista, "Por favor, seleccione una materia de la tabla para gestionar sus correlativas.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String nombreMateria = (String) vista.getTablaMaterias().getValueAt(filaSeleccionada, 1);
+
+        // Buscamos el objeto real en el mapa del modelo
+        materiaSeleccionadaCorrelativas = modelo.getMapaMaterias().get(nombreMateria);
+
+        if (materiaSeleccionadaCorrelativas != null) {
+            enModoCorrelativas = true;
+            paginaActual = 1; // Reseteamos el paginado al ingresar
+
+            // Transicionamos la interfaz visual
+            vista.mostrarModoGestionCorrelativas(nombreMateria);
+
+            // Forzamos el refresco para mostrar únicamente las correlativas de esta materia
+            this.actualizarTabla();
+        } else {
+            JOptionPane.showMessageDialog(vista, "Error: No se pudo encontrar los datos de la materia en el sistema.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void eliminarCorrelativa(){
+        int filaSeleccionada = vista.getTablaMaterias().getSelectedRow();
+
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(vista, "Seleccione la correlativa que desea remover de la lista.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String nombreCorrelativa = (String) vista.getTablaMaterias().getValueAt(filaSeleccionada, 1);
+
+        int confirmacion = JOptionPane.showConfirmDialog(
+                vista,
+                "¿Está seguro de quitar a '" + nombreCorrelativa + "' como correlativa de '" + materiaSeleccionadaCorrelativas.getNombre() + "'?",
+                "Confirmar Desvinculación",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            // Buscamos el objeto de la correlativa para removerlo de la lista interna de la materia
+            Prerrequisito correlativaARemover = null;
+
+
+            for (Prerrequisito m : materiaSeleccionadaCorrelativas.getCorrelativas()) {
+                if (m.getMateriaRequerida().getNombre().equals(nombreCorrelativa)) {
+                    correlativaARemover = m;
+                    break;
+                }
+            }
+
+            if (correlativaARemover != null) {
+                materiaSeleccionadaCorrelativas.getCorrelativas().remove(correlativaARemover);
+                JOptionPane.showMessageDialog(vista, "Correlativa eliminada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                this.actualizarTabla();
+            }
+        }
+
+    }
+
+    public void agregarCorrelativa() {
+        // 1. Verificamos si realmente hay materias que se puedan agregar
+        boolean hayDisponibles = false;
+        for (Materia m : modelo.getMapaMaterias().values()) {
+            if (m.getCodigoMateria().equals(materiaSeleccionadaCorrelativas.getCodigoMateria())) {
+                continue;
+            }
+            boolean yaEsCorrelativa = false;
+            for (Prerrequisito p : materiaSeleccionadaCorrelativas.getCorrelativas()) {
+                if (p.getMateriaRequerida().getCodigoMateria().equals(m.getCodigoMateria())) {
+                    yaEsCorrelativa = true;
+                    break;
+                }
+            }
+            if (!yaEsCorrelativa) {
+                hayDisponibles = true;
+                break;
+            }
+        }
+
+        if (!hayDisponibles) {
+            JOptionPane.showMessageDialog(vista, "No hay más materias disponibles en el sistema para asignar como correlativas.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // 2. Activamos el modo selección
+        enModoSeleccionCorrelativa = true;
+
+        // 3. Le avisamos a la vista que cambie los botones (ej: "Agregar" pasa a "Confirmar Selección")
+        vista.mostrarModoSeleccionCorrelativa(materiaSeleccionadaCorrelativas.getNombre());
+
+        // 4. Refrescamos la tabla para que dibuje los candidatos
+        this.actualizarTabla();
+    }
+
     public boolean existeCodigoMateria(Integer codigoBuscado) {
         // Recorremos todos los objetos Materia guardados en los valores del HashMap
         for (Materia m : modelo.getMapaMaterias().values()) {
@@ -253,45 +376,189 @@ public class ControladorMaterias implements ActionListener {
 
     }
 
+    public void confirmarSeleccionCorrelativa() {
+        int filaSeleccionada = vista.getTablaMaterias().getSelectedRow();
+
+        // 1. Validamos que realmente haya hecho clic en alguna fila de la lista de disponibles
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(
+                    vista,
+                    "Por favor, seleccione la materia que desea asignar de la tabla.",
+                    "Atención",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        // 2. Obtenemos el nombre de la materia elegida
+        String nombreMateriaRequerida = (String) vista.getTablaMaterias().getValueAt(filaSeleccionada, 1);
+
+        // 3. Buscamos el objeto Materia real en nuestro modelo
+        Materia materiaRequerida = modelo.getMapaMaterias().get(nombreMateriaRequerida);
+
+        if (materiaRequerida != null) {
+            // 4. Le preguntamos el tipo de condición (REGULAR o APROBADA) usando los enums de Prerrequisito
+            Prerrequisito.TipoPrerrequisito[] opciones = Prerrequisito.TipoPrerrequisito.values();
+            Prerrequisito.TipoPrerrequisito tipoElegido = (Prerrequisito.TipoPrerrequisito) JOptionPane.showInputDialog(
+                    vista,
+                    "Seleccione la condición requerida para '" + materiaRequerida.getNombre() + "':",
+                    "Condición de Correlativa",
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    opciones,
+                    opciones[0]
+            );
+
+            // 5. Si no canceló el cartelito, creamos la correlativa y la guardamos
+            if (tipoElegido != null) {
+                Prerrequisito nuevoPrerrequisito = new Prerrequisito(materiaRequerida, tipoElegido);
+                materiaSeleccionadaCorrelativas.addCorrelativa(nuevoPrerrequisito);
+
+                JOptionPane.showMessageDialog(
+                        vista,
+                        "¡Se asignó '" + materiaRequerida.getNombre() + "' como correlativa con éxito!",
+                        "Operación Exitosa",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+                // 6. Desactivamos el modo selección, volvemos al panel de gestión y redibujamos la tabla
+                enModoSeleccionCorrelativa = false;
+                vista.mostrarModoGestionCorrelativas(materiaSeleccionadaCorrelativas.getNombre());
+                this.actualizarTabla();
+            }
+        } else {
+            JOptionPane.showMessageDialog(
+                    vista,
+                    "Error crítico: No se pudo recuperar la materia seleccionada desde el sistema.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private void procesarVolver(){
+        // Si estoy seleccionando una materia para correlacionar (Estado 3)
+        if (enModoSeleccionCorrelativa) {
+            enModoSeleccionCorrelativa = false;
+            // Volvemos al Estado 2 (Ver Correlativas de la materia que estábamos editando)
+            vista.mostrarModoGestionCorrelativas(materiaSeleccionadaCorrelativas.getNombre());
+            this.actualizarTabla();
+            return; // Cortamos acá para no seguir retrocediendo al menú principal
+        }
+
+        // Si estoy en la gestión de correlativas (Estado 2)
+        if (enModoCorrelativas) {
+            enModoCorrelativas = false;
+            materiaSeleccionadaCorrelativas = null;
+            // Volvemos al Estado 1 (Menú Principal)
+            vista.mostrarModoLista(); // <- Acuérdate de agregarle a este método el "btnEliminar.setVisible(true)" que vimos antes
+            this.actualizarTabla();
+        }
+    }
+
     // 5. LÓGICA DE PAGINACIÓN Y REFRESCO DE TABLA
     private void actualizarTabla() {
         DefaultTableModel dtm = vista.getModeloTabla();
         dtm.setRowCount(0); // Vaciamos la tabla por completo
 
-        // Le pedimos al modelo TODAS las materias registradas y le pasamos los values() adentro del constructor de ArrayList para crear una lista real
+        // =====================================================================
+        // CASO A: ESTAMOS EN MODO SELECCIÓN DE NUEVA CORRELATIVA
+        // =====================================================================
+        if (enModoCorrelativas && enModoSeleccionCorrelativa && materiaSeleccionadaCorrelativas != null) {
+
+            // 1. Aseguramos las cabeceras para la selección
+            dtm.setColumnIdentifiers(new String[]{"Código", "Nombre de Materia", "Cuatrimestre"});
+
+            for (Materia m : modelo.getMapaMaterias().values()) {
+                // Filtro 1: No auto-correlacionarse
+                if (m.getCodigoMateria().equals(materiaSeleccionadaCorrelativas.getCodigoMateria())) {
+                    continue;
+                }
+
+                // Filtro 2: Que no sea una correlativa ya existente
+                boolean yaEsCorrelativa = false;
+                for (Prerrequisito p : materiaSeleccionadaCorrelativas.getCorrelativas()) {
+                    if (p.getMateriaRequerida().getCodigoMateria().equals(m.getCodigoMateria())) {
+                        yaEsCorrelativa = true;
+                        break;
+                    }
+                }
+
+                // Si pasa los filtros, la mostramos en la tabla para que el usuario la cliquee
+                if (!yaEsCorrelativa) {
+                    Object[] fila = {
+                            m.getCodigoMateria(),
+                            m.getNombre(),
+                            m.getCuatrimestre() + "º Cuatrimestre"
+                    };
+                    dtm.addRow(fila);
+                }
+            }
+
+            vista.getLblPaginacion().setText("Seleccione una materia de la lista para correlacionar");
+            vista.getBtnAnterior().setEnabled(false);
+            vista.getBtnSiguiente().setEnabled(false);
+            return; // Cortamos acá
+        }
+
+        // =====================================================================
+        // CASO B: ESTAMOS EN MODO GESTIÓN DE CORRELATIVAS
+        // =====================================================================
+        if (enModoCorrelativas && materiaSeleccionadaCorrelativas != null) {
+
+            // 2.  Cambiamos la cabecera para que la tercera columna diga "Condición Requerida"
+            dtm.setColumnIdentifiers(new String[]{"Código", "Nombre de Materia", "Condición Requerida"});
+
+            for (Prerrequisito p : materiaSeleccionadaCorrelativas.getCorrelativas()) {
+                Materia mat = p.getMateriaRequerida();
+                Object[] fila = {
+                        mat.getCodigoMateria(),
+                        mat.getNombre(),
+                        p.getTipo().toString()
+                };
+                dtm.addRow(fila);
+            }
+            vista.getLblPaginacion().setText("Mostrando correlativas de: " + materiaSeleccionadaCorrelativas.getNombre());
+            vista.getBtnAnterior().setEnabled(false);
+            vista.getBtnSiguiente().setEnabled(false);
+            return;
+        }
+
+        // =====================================================================
+        // CASO C: MODO NORMAL (LISTADO GENERAL DE MATERIAS)
+        // =====================================================================
+
+        // 3.  Restauramos las cabeceras originales de la lista general
+        dtm.setColumnIdentifiers(new String[]{"Código", "Nombre de Materia", "Cuatrimestre"});
+
         List<Materia> todasLasMaterias = new ArrayList<>(modelo.getMapaMaterias().values());
 
-        // Ordenamos la lista por código de menor a mayor
-        // Así el orden es predecible y la matemática de páginas no falla jamás.
+        // Ordenamos la lista por código de menor a mayor para que el paginado sea predecible
         todasLasMaterias.sort((m1, m2) -> Integer.compare(m1.getCodigoMateria(), m2.getCodigoMateria()));
 
         int totalRegistros = todasLasMaterias.size();
 
-        // Calculamos cuántas páginas máximas hay en base a la cantidad de elementos
-        // Usamos Math.ceil para redondear hacia arriba (ej: 6 materias / 5 por pág = 2 páginas)
+        // Calculamos las páginas en base a las materias totales
         int paginasMaximas = (int) Math.ceil((double) totalRegistros / FILAS_POR_PAGINA);
         if (paginasMaximas == 0) paginasMaximas = 1;
 
-        // Si por eliminaciones nos quedamos en una página inexistente, recalculamos
+        // Si borramos materias y la página actual quedó fuera de rango, recalculamos
         if (paginaActual > paginasMaximas) {
             paginaActual = paginasMaximas;
         }
 
-        // Calculamos los índices de la lista global para saber qué pedacito renderizar
+        // Calculamos los índices para mostrar solo las 10 materias de la página actual
         int indiceInicio = (paginaActual - 1) * FILAS_POR_PAGINA;
         int indiceFin = Math.min(indiceInicio + FILAS_POR_PAGINA, totalRegistros);
 
-        // Cargamos solo las filas correspondientes a la página actual
         for (int i = indiceInicio; i < indiceFin; i++) {
             Materia mat = todasLasMaterias.get(i);
-            Object[] fila = { mat.getCodigoMateria(), mat.getNombre(), mat.getCuatrimestre() };
+            Object[] fila = { mat.getCodigoMateria(), mat.getNombre(), mat.getCuatrimestre() + "º Cuatrimestre" };
             dtm.addRow(fila);
         }
 
-        // Actualizamos el cartelito "Página X de Y" en la UI
+        // Actualizamos controles de paginación en la vista
         vista.getLblPaginacion().setText("Página " + paginaActual + " de " + paginasMaximas);
-
-        // Habilitamos o deshabilitamos los botones de navegación según corresponda
         vista.getBtnAnterior().setEnabled(paginaActual > 1);
         vista.getBtnSiguiente().setEnabled(paginaActual < paginasMaximas);
     }
