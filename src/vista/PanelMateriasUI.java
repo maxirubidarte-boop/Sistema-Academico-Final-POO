@@ -20,6 +20,10 @@ public class PanelMateriasUI extends JPanel {
     private JButton btnEliminar;
     private JButton btnGuardar;
     private JButton btnCancelar;
+    private JButton btnEditar;
+    private JButton btnCorrelativas;
+    private JButton btnVolver;
+
 
     // Botones y etiquetas de paginación
     private JButton btnAnterior;
@@ -30,6 +34,7 @@ public class PanelMateriasUI extends JPanel {
     private JPanel panelDerechoContenedor;
     private JPanel panelFormulario;
     private JLabel lblTituloFormulario;
+    private JLabel lblTituloModulo;
 
 
     public PanelMateriasUI() {
@@ -38,7 +43,7 @@ public class PanelMateriasUI extends JPanel {
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // --- NORTE: El título del módulo ---
-        JLabel lblTituloModulo = new JLabel("Administración de Materias", JLabel.CENTER);
+        lblTituloModulo = new JLabel("Administración de Materias", JLabel.CENTER);
         lblTituloModulo.setFont(new Font("Arial", Font.BOLD, 18));
         this.add(lblTituloModulo, BorderLayout.NORTH);
 
@@ -81,13 +86,19 @@ public class PanelMateriasUI extends JPanel {
         panelBotonesAccion.setBorder(BorderFactory.createTitledBorder("Acciones"));
         btnAgregar = new JButton("Agregar Materia");
         btnEliminar = new JButton("Eliminar Materia");
+        btnEditar = new JButton("Editar Materia");
+        btnEditar.setFocusPainted(false);
+        btnCorrelativas = new JButton("Correlativas");
+        btnVolver = new JButton("Volver");
 
         panelBotonesAccion.add(btnAgregar);
         panelBotonesAccion.add(btnEliminar);
-        // Rellenamos el resto del GridLayout para que los botones no se estiren feo
-        for (int i = 0; i < 4; i++) {
-            panelBotonesAccion.add(new JLabel(""));
-        }
+        panelBotonesAccion.add(btnEditar);
+        panelBotonesAccion.add(btnCorrelativas);
+        panelBotonesAccion.add(btnVolver);
+
+        // Con un solo casillero vacío ya completamos las 6 filas del GridLayout
+        panelBotonesAccion.add(new JLabel(""));
 
         // CARTA 2: Formulario de Carga (Modo Alta)
         panelFormulario = new JPanel(new GridBagLayout());
@@ -141,13 +152,21 @@ public class PanelMateriasUI extends JPanel {
 
         this.add(panelDerechoContenedor, BorderLayout.EAST);
     }
-
     //  MÉTODOS DE CONTROL VISUAL (Intercambio de cartas)
 
     public void mostrarModoLista() {
         txtCodigo.setText("");
         txtNombre.setText("");
         txtCodigo.setEditable(true);
+
+        btnAgregar.setText("Agregar Materia");
+        btnEliminar.setText("Eliminar Materia");
+
+        btnEditar.setVisible(true);
+        btnCorrelativas.setVisible(true);
+        btnVolver.setVisible(false);
+
+        lblTituloModulo.setText("Administración de Materias");
 
         CardLayout cl = (CardLayout) panelDerechoContenedor.getLayout();
         cl.show(panelDerechoContenedor, "Botones");
@@ -164,18 +183,56 @@ public class PanelMateriasUI extends JPanel {
         tablaMaterias.setEnabled(false);
     }
 
-    // -------------------------------------------------------------------------
-    //  ENLACE CON EL CONTROLADOR
-    // -------------------------------------------------------------------------
+    public void mostrarModoEdicion(String codigo, String nombre, int cuatrimestre) {
+        lblTituloFormulario.setText("Editar Materia");
+
+        // Cargamos los campos con los datos actuales
+        txtCodigo.setText(codigo);
+        txtCodigo.setEditable(false); // Bloqueamos el código para que no lo alteren
+        txtNombre.setText(nombre);
+
+        // Como el cuatrimestre viene de 1 a 6, restamos 1 para el índice del combo (0 a 5)
+        comboCuatrimestre.setSelectedIndex(cuatrimestre - 1);
+
+        // Mostramos el formulario de la derecha
+        CardLayout cl = (CardLayout) panelDerechoContenedor.getLayout();
+        cl.show(panelDerechoContenedor, "Formulario");
+
+        tablaMaterias.setEnabled(false); // Deshabilitamos la tabla mientras edita
+    }
+
+    public void mostrarModoGestionCorrelativas(String nombreMateria){
+        lblTituloModulo.setText("Correlativas de: " + nombreMateria);
+
+        // Mutamos el texto de los mismos botones
+        btnAgregar.setText("Agregar Correlativa");
+        btnEliminar.setText("Eliminar Correlativa");
+
+        btnEditar.setVisible(false); // Ocultamos Editar porque acá no tiene sentido usarlo
+        btnCorrelativas.setVisible(false);
+        btnVolver.setVisible(true);
+
+        CardLayout cl = (CardLayout) panelDerechoContenedor.getLayout();
+        cl.show(panelDerechoContenedor, "Botones");
+
+        tablaMaterias.setEnabled(true);
+    }
+
     public void escucharComponentes(ActionListener listener) {
         btnAgregar.addActionListener(listener);
         btnEliminar.addActionListener(listener);
         btnGuardar.addActionListener(listener);
         btnCancelar.addActionListener(listener);
+        btnEditar.addActionListener(listener);
         btnAnterior.addActionListener(listener);
         btnSiguiente.addActionListener(listener);
+        btnCorrelativas.addActionListener(listener);
+        btnVolver.addActionListener(listener);
     }
 
+    // =========================================================================
+    // GETTERS
+    // =========================================================================
 
     public JTable getTablaMaterias() { return tablaMaterias; }
     public DefaultTableModel getModeloTabla() { return modeloTabla; }
@@ -185,4 +242,13 @@ public class PanelMateriasUI extends JPanel {
     public JButton getBtnAnterior() { return btnAnterior; }
     public JButton getBtnSiguiente() { return btnSiguiente; }
     public JLabel getLblPaginacion() { return lblPaginacion; }
+
+    public JButton getBtnAgregar() { return btnAgregar; }
+    public JButton getBtnEliminar() { return btnEliminar; }
+    public JButton getBtnCorrelativas() { return btnCorrelativas;}
+    public JButton getBtnVolver() { return btnVolver; }
+
+    public JButton getBtnGuardar(){return btnGuardar;}
+    public JButton getBtnCancelar(){return btnCancelar;}
+    public JButton getBtnEditar(){return btnEditar;}
 }

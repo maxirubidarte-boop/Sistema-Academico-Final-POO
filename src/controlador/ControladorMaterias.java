@@ -14,6 +14,8 @@ public class ControladorMaterias implements ActionListener {
 
     private PanelMateriasUI vista;
     private ModeloSistemaAcademico modelo;
+    // Bandera de estado para el botón "Guardar"
+    private boolean esAlta = true;
 
     // Variables para controlar la paginación de a 5 filas
     private int paginaActual = 1;
@@ -54,25 +56,32 @@ public class ControladorMaterias implements ActionListener {
             case "Siguiente >":
                 this.paginaSiguiente();
                 break;
+            case "Editar Materia":
+                this.editarMateria();
+                break;
         }
     }
 
     // 4. MÉTODOS OPERATIVOS (El cerebro del controlador)
 
     private void guardarMateria() {
-        // Extraemos la información de la pantalla usando los getters de tu vista
+
+        // 1. EXTRACCIÓN DE DATOS DESDE LA VISTA
+
         String txtCodigo = vista.getTxtCodigo();
         String nombre = vista.getTxtNombre();
         Integer cuatri = vista.getCuatrimestreSeleccionado();
 
-        // Validación 1: Campos vacíos
+        // 2. VALIDACIONES GENERALES
+
+        // Validación A: Que no dejen campos vacíos
         if (txtCodigo.isEmpty() || nombre.isEmpty()) {
             JOptionPane.showMessageDialog(vista, "Todos los campos son obligatorios.", "Error de Validación", JOptionPane.WARNING_MESSAGE);
-            return;
+            return; // Corta la ejecución si hay error
         }
 
+        // Validación B: Intentar convertir el String del código a un Integer real
         int codigo;
-        // Validación 2: Intentar parsear el código a Integer (Uso estricto de try-catch)
         try {
             codigo = Integer.parseInt(txtCodigo);
         } catch (NumberFormatException ex) {
@@ -80,27 +89,80 @@ public class ControladorMaterias implements ActionListener {
             return;
         }
 
-        // Validación 3: Número positivo
+        // Validación C: Que el número sea positivo y coherente
         if (codigo <= 0) {
             JOptionPane.showMessageDialog(vista, "El código debe ser un número mayor a cero.", "Error de Rango", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Validación 4: Duplicados en el Backend
-        // (Asumo que tu modelo tiene un método para verificar si ya existe esa clave primaria)
-        if (existeCodigoMateria(codigo)) {
-            JOptionPane.showMessageDialog(vista, "Ya existe una materia registrada con el código " + codigo, "Materia Duplicada", JOptionPane.ERROR_MESSAGE);
-            return;
+        // 3. BIFURCACIÓN DE LÓGICA DE NEGOCIO (El "if" de esAlta)
+
+        if (esAlta) {
+
+            //  CAMINO A: REGISTRAR MATERIA NUEVA
+
+            // Control de código duplicado
+            if (existeCodigoMateria(codigo)) {
+                JOptionPane.showMessageDialog(vista, "Ya existe una materia registrada con el código " + codigo, "Materia Duplicada", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Control de nombre duplicado
+            if (modelo.getMapaMaterias().containsKey(nombre)) {
+                JOptionPane.showMessageDialog(vista, "Ya existe una materia registrada con el nombre '" + nombre + "'", "Materia Duplicada", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Si pasó todos los controles,la mandamos al modelo
+            modelo.registrarMateria(codigo, nombre, cuatri);
+            JOptionPane.showMessageDialog(vista, "Materia guardada con éxito.", "Operación Exitosa", JOptionPane.INFORMATION_MESSAGE);
+
+        } else {
+            //  CAMINO B: MODIFICAR MATERIA EXISTENTE
+
+            // Buscamos la materia original en el modelo usando su código (que no cambió)
+            Materia materiaAEditar = null;
+            for (Materia m : modelo.getMapaMaterias().values()) {
+                if (m.getCodigoMateria() == codigo) {
+                    materiaAEditar = m;
+                    break;
+                }
+            }
+
+            if (materiaAEditar != null) {
+                String nombreViejo = materiaAEditar.getNombre();
+
+                // ¿El usuario cambió el nombre de la materia?
+                if (!nombreViejo.equals(nombre)) {
+                    // Validamos que el nuevo nombre no lo tenga otra materia ya cargada
+                    if (modelo.getMapaMaterias().containsKey(nombre)) {
+                        JOptionPane.showMessageDialog(vista, "No se puede renombrar. Ya existe otra materia llamada '" + nombre + "'", "Nombre Duplicado", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Si todo está ok, removemos la clave vieja del HashMap para que no queden hilos sueltos
+                    modelo.getMapaMaterias().remove(nombreViejo);
+                }
+
+                // Actualizamos los datos del objeto
+                materiaAEditar.setNombre(nombre);
+                materiaAEditar.setCuatrimestre(cuatri);
+
+                // Volvemos a meter el objeto en el mapa con la clave (nueva o vieja)
+                modelo.getMapaMaterias().put(nombre, materiaAEditar);
+
+                JOptionPane.showMessageDialog(vista, "Materia modificada con éxito.", "Operación Exitosa", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(vista, "Error crítico: No se encontró la materia original.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
 
-        //  Se lo enviamos al modelo
-        modelo.registrarMateria(codigo, nombre, cuatri);
 
-        JOptionPane.showMessageDialog(vista, "Materia guardada con éxito.", "Operación Exitosa", JOptionPane.INFORMATION_MESSAGE);
+        // 4. LIMPIEZA Y RESTABLECIMIENTO DE LA UI
 
-        // Volvemos al modo lista, limpiamos el formulario y refrescamos la JTable
-        vista.mostrarModoLista();
-        this.actualizarTabla();
+        esAlta = true; // Reseteamos el semáforo para que la próxima por defecto sea un Alta
+        vista.mostrarModoLista(); // Cerramos el formulario de la derecha y volvemos a mostrar botones
+        this.actualizarTabla(); // Recargamos la tabla con los cambios frescos
     }
 
     public boolean existeCodigoMateria(Integer codigoBuscado) {
@@ -112,7 +174,6 @@ public class ControladorMaterias implements ActionListener {
         }
         return false; // Terminó el bucle y nadie tenía ese código
     }
-
 
     private void eliminarMateria() {
         // 1. Capturamos la fila seleccionada de la tabla
@@ -164,6 +225,32 @@ public class ControladorMaterias implements ActionListener {
                 );
             }
         }
+    }
+
+    private void editarMateria(){
+
+        // 1. Verificamos si hay una fila seleccionada en la JTable
+        int filaEdicion = vista.getTablaMaterias().getSelectedRow();
+        if (filaEdicion == -1){
+            JOptionPane.showMessageDialog(vista, "Seleccione una materia de la tabla para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 2. Extraemos los datos de la fila seleccionada (según el orden de tus columnas en la vista)
+        // Columnas: {"Código", "Nombre de Materia", "Cuatrimestre"}
+        String codigoEdit = vista.getModeloTabla().getValueAt(filaEdicion, 0).toString();
+        String nombreEdit = vista.getModeloTabla().getValueAt(filaEdicion, 1).toString();
+        String cuatrimestreStr = vista.getModeloTabla().getValueAt(filaEdicion, 2).toString();
+
+        // Parseamos el cuatrimestre (ej: "1º Cuatrimestre" -> nos quedamos con el número 1)
+        int cuatrimestreEdit = Character.getNumericValue(cuatrimestreStr.charAt(0));
+
+        // 3. Marcamos que NO es un alta (es una edición)
+        esAlta = false;
+
+        // 4. Mandamos los datos a la vista para que arme el formulario bloqueado
+        vista.mostrarModoEdicion(codigoEdit, nombreEdit, cuatrimestreEdit);
+
     }
 
     // 5. LÓGICA DE PAGINACIÓN Y REFRESCO DE TABLA

@@ -44,6 +44,13 @@ public class PanelAlumnosUI extends JPanel {
     private void armarPanelLista() {
         panelLista = new JPanel(new BorderLayout());
 
+        // Título de la sección
+        JLabel lblTituloSeccion = new JLabel("Administración de Alumnos", SwingConstants.CENTER);
+        lblTituloSeccion.setFont(new Font("Arial", Font.BOLD, 18));
+        // Un margen vacío arriba y abajo para que respire y no quede pegado al borde
+        lblTituloSeccion.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 10));
+        panelLista.add(lblTituloSeccion, BorderLayout.NORTH); // <-- Lo clavamos en el Norte
+
         // Configuración de la Tabla
         String[] columnas = {"DNI", "Legajo", "Nombre", "Carrera Actual"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
