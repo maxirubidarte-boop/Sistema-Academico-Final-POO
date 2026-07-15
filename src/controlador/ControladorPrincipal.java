@@ -1,6 +1,7 @@
 package controlador;
 
 import modelo.ModeloSistemaAcademico;
+import vista.PanelCarrerasUI;
 import vista.PanelMateriasUI;
 import vista.VentanaPrincipalUI;
 import vista.PanelAlumnosUI;
@@ -45,11 +46,10 @@ public class ControladorPrincipal implements ActionListener {
                 break;
 
             case "Sección Carreras":
-                // Cartelito temporal para las secciones vacías
-                JOptionPane.showMessageDialog(ventanaMadre,
-                        "La " + comando + " estará disponible en los próximos pasos.",
-                        "Módulo en construcción",
-                        JOptionPane.INFORMATION_MESSAGE);
+                PanelCarrerasUI panelCarrerasUI = new PanelCarrerasUI();
+                ControladorCarreras ctrlCarreras = new ControladorCarreras(panelCarrerasUI, modelo);
+
+                ventanaMadre.setPanelCentral(panelCarrerasUI);
                 break;
 
             case "Planes y Notas":

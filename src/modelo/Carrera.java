@@ -22,7 +22,7 @@ public class Carrera {
     }
 
 
-    public void addPlanDeEstudio (PlanDeEstudio plan){
+    public void setPlanDeEstudio (PlanDeEstudio plan){
         this.planDeEstudio = plan;
     }
 

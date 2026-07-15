@@ -213,7 +213,7 @@ public class PanelCarrerasUI extends JPanel{
             tablaCarreras.setEnabled(true);
         }
 
-        public void mostrarModoSeleccionCarreras(String nombreCarrera) {
+        public void mostrarModoSeleccionPlanDeEstudio(String nombreCarrera) {
             lblTituloModulo.setText("Planes disponibles para asignar a: " + nombreCarrera);
 
             // Cambiamos el texto del botón de agregar para que actúe como confirmación

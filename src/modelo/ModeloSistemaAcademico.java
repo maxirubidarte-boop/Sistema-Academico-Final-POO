@@ -129,7 +129,7 @@ public class ModeloSistemaAcademico {
             // Limpiamos las carreras que tengan el plan
             for (Carrera c : carreras.values()){
                 if (c.getPlanDeEstudio() != null && c.getPlanDeEstudio().getCodigo().equals(codigoDelPlan)){ //compara los planes con el codigo para ver si es el mismo
-                    c.addPlanDeEstudio(null);
+                    c.setPlanDeEstudio(null);
                 }
             }
 
@@ -145,7 +145,7 @@ public class ModeloSistemaAcademico {
             Carrera carrera = carreras.get(nombreCarrera);
             PlanDeEstudio planBuscado = planesDeEstudio.get(codigoPlan);
             if (carrera != null && planBuscado != null){
-                carrera.addPlanDeEstudio(planBuscado);
+                carrera.setPlanDeEstudio(planBuscado);
             }
         }
     }
