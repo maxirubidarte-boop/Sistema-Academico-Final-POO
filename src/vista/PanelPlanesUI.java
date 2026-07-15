@@ -14,7 +14,7 @@ public class PanelPlanesUI extends JPanel {
     private JPanel panelIzquierdo;
     private JTable tablaPlanes;
     private DefaultTableModel modeloTabla;
-    private JButton btnNuevoPlan, btnEliminarPlan;
+    private JButton btnNuevoPlan, btnEliminarPlan, btnEditarPlan;
 
     // --- LADO DERECHO: PANEL CARD (DINÁMICO) ---
     private JPanel panelDerechoCard;
@@ -86,12 +86,15 @@ public class PanelPlanesUI extends JPanel {
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         btnNuevoPlan = new JButton("Nuevo Plan");
         btnEliminarPlan = new JButton("Eliminar Seleccionado");
+        btnEditarPlan = new JButton("Editar Plan");
 
+        btnEditarPlan.setFocusPainted(false);
         btnNuevoPlan.setFocusPainted(false);
         btnEliminarPlan.setFocusPainted(false);
 
         panelBotones.add(btnNuevoPlan);
         panelBotones.add(btnEliminarPlan);
+        panelBotones.add(btnEditarPlan);
         panelIzquierdo.add(panelBotones, BorderLayout.SOUTH);
     }
 
@@ -230,6 +233,18 @@ public class PanelPlanesUI extends JPanel {
         cardLayoutDerecho.show(panelDerechoCard, "FORMULARIO");
     }
 
+    public void mostrarModoEdicion(String codigo, String nombre, String minOblig, String minOpta) {
+        txtCodigo.setText(codigo);
+        txtCodigo.setEditable(false); // Bloqueado: No se puede cambiar el ID del plan al editar
+        txtNombre.setText(nombre);
+        txtMinOblig.setText(minOblig);
+        txtMinOpta.setText(minOpta);
+
+        listaMateriasObligatorias.clearSelection();
+        listaMateriasOptativas.clearSelection();
+        cardLayoutDerecho.show(panelDerechoCard, "FORMULARIO");
+    }
+
     // --- GETTERS & METODOS DE LLENADO ---
 
     public DefaultTableModel getModeloTabla() { return modeloTabla; }
@@ -240,6 +255,8 @@ public class PanelPlanesUI extends JPanel {
     public String getTxtMinOblig() { return txtMinOblig.getText().trim(); }
     public String getTxtMinOpta() { return txtMinOpta.getText().trim(); }
     public JComboBox<String> getComboEstrategia() { return comboEstrategia; }
+
+    public JButton getBtnEditarPlan() { return btnEditarPlan; }
 
     public JList<String> getListaMateriasObligatorias() { return listaMateriasObligatorias; }
     public JList<String> getListaMateriasOptativas() { return listaMateriasOptativas; }
@@ -253,5 +270,6 @@ public class PanelPlanesUI extends JPanel {
         btnEliminarPlan.addActionListener(listener);
         btnGuardar.addActionListener(listener);
         btnCancelar.addActionListener(listener);
+        btnEditarPlan.addActionListener(listener);
     }
 }

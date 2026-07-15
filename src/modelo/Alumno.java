@@ -50,11 +50,9 @@ public class Alumno extends Persona {
     }
 
 
-
     public void editarDatos (String nombre, Integer legajo){
         this.editarMisDatos(nombre,legajo);
     }
-
 
 
     public Carrera getCarreraActual() {
@@ -93,7 +91,9 @@ public class Alumno extends Persona {
 
     // Lógica para saber si está graduado
     public boolean estaGraduado() {
-        // El alumno se gradúa si cumple con el Plan de Estudio de su carrera
+        if (carreraActual == null || carreraActual.getPlanDeEstudio() == null) {
+            return false; // Sin carrera o sin plan, lógicamente no puede estar graduado
+        }
         return this.carreraActual.getPlanDeEstudio().estaGraduado(this);
     }
 
@@ -106,7 +106,7 @@ public class Alumno extends Persona {
 
     public ArrayList<Materia> getMateriasAptasACursar(){
         ArrayList<Materia> aptas = new ArrayList<>();
-        if (carreraActual != null){
+        if (carreraActual != null && carreraActual.getPlanDeEstudio() != null){
             PlanDeEstudio plan = this.carreraActual.getPlanDeEstudio();
 
             CondicionDeInscripcion condicion = plan.getCondicion();

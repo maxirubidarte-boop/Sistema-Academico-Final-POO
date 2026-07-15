@@ -150,6 +150,82 @@ public class ModeloSistemaAcademico {
         }
     }
 
+    //  Edita un plan existente pisando sus datos y manteniendo sus relaciones intactas
+    public boolean editarPlan(int codigo, String nombre, int minOblig, int minOpta,
+                              EstrategiaDeInscripcion estrategia,
+                              ArrayList<Integer> obligatoriasIDs, ArrayList<Integer> optativasIDs) {
+
+        // 1. Buscamos el plan original en nuestro mapa general por su código
+        PlanDeEstudio plan = planesDeEstudio.get(codigo);
+        if (plan == null) {
+            System.out.println(" [ERR] No se encontró ningún plan con el código: " + codigo);
+            return false;
+        }
+
+        // 2. Validaciones básicas de integridad de datos
+        if (nombre == null || nombre.trim().isEmpty() || minOblig < 0 || minOpta < 0 || estrategia == null) {
+            System.out.println(" [ERR] Parámetros inválidos para la actualización.");
+            return false;
+        }
+
+        // 3. Resolvemos las materias obligatorias buscando por ID (tal como lo hacés en la creación)
+        ArrayList<Materia> obligatoriasNuevas = new ArrayList<>();
+        for (Integer id : obligatoriasIDs) {
+            Materia m = null;
+            for (Materia mat : materias.values()) {
+                if (mat.getCodigoMateria().equals(id)) {
+                    m = mat;
+                    break;
+                }
+            }
+            if (m != null) {
+                obligatoriasNuevas.add(m);
+            }
+        }
+
+        // 4. Resolvemos las materias optativas buscando por ID
+        ArrayList<Materia> optativasNuevas = new ArrayList<>();
+        for (Integer id : optativasIDs) {
+            Materia m = null;
+            for (Materia mat : materias.values()) {
+                if (mat.getCodigoMateria().equals(id)) {
+                    m = mat;
+                    break;
+                }
+            }
+            if (m != null) {
+                optativasNuevas.add(m);
+            }
+        }
+
+        // 5. Validación de mínimos vs cantidad real de materias resueltas
+        if (minOblig > obligatoriasNuevas.size() || minOpta > optativasNuevas.size()) {
+            System.out.println(" [ERR] Mínimos requeridos superan las materias asignadas.");
+            return false;
+        }
+
+        // 6. Pisamos los datos primitivos y el nombre
+        plan.setNombre(nombre);
+        plan.setMinObligatorias(minOblig);
+        plan.setMinOptativas(minOpta);
+
+        // 7. Creamos la nueva condición de inscripción con la estrategia elegida y la asignamos
+        CondicionDeInscripcion nuevaCondicion = new CondicionDeInscripcion(estrategia);
+        plan.setCondicion(nuevaCondicion);
+
+        // 8. Limpiamos y rellenamos las listas internas usando .clear() y .addAll()
+        // Esto mantiene la misma referencia de los ArrayList originales de la clase PlanDeEstudio,
+        // evitando que cualquier otra parte del sistema que apunte a ellos se desincronice.
+        plan.getObligatorias().clear();
+        plan.getObligatorias().addAll(obligatoriasNuevas);
+
+        plan.getOptativas().clear();
+        plan.getOptativas().addAll(optativasNuevas);
+
+        System.out.println("[OK] Plan de Estudio [ID: " + codigo + "] modificado con éxito en el sistema.");
+        return true;
+    }
+
 
 
     //----------------------------------------- METODOS REFERIDOS A LAS MATERIAS -----------------------------------------------------------------------------------------------------//

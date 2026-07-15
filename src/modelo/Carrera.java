@@ -16,17 +16,16 @@ public class Carrera {
         this.alumnosInscritos = new HashMap<>();
     }
 
-
     public void setNombre (String nombre){
         this.nombre = nombre;
     }
-
 
     public void setPlanDeEstudio (PlanDeEstudio plan){
         this.planDeEstudio = plan;
     }
 
     public String getNombre (){return nombre;}
+
     public PlanDeEstudio getPlanDeEstudio(){return planDeEstudio;}
 
     public int getCodigoCarrera (){return codigo;}
@@ -49,6 +48,7 @@ public class Carrera {
     public void inscribirAlumno(Alumno alumno) {
         if (alumno != null) {
             alumnosInscritos.put(alumno.getDni(), alumno);
+            alumno.setCarreraActual(this);
         } else {
             System.out.println("Error: El alumno no puede ser null");
         }

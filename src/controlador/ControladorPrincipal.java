@@ -1,10 +1,8 @@
 package controlador;
 
 import modelo.ModeloSistemaAcademico;
-import vista.PanelCarrerasUI;
-import vista.PanelMateriasUI;
-import vista.VentanaPrincipalUI;
-import vista.PanelAlumnosUI;
+import vista.*;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
@@ -53,11 +51,10 @@ public class ControladorPrincipal implements ActionListener {
                 break;
 
             case "Planes y Notas":
-                // Cartelito temporal para las secciones vacías
-                JOptionPane.showMessageDialog(ventanaMadre,
-                        "La " + comando + " estará disponible en los próximos pasos.",
-                        "Módulo en construcción",
-                        JOptionPane.INFORMATION_MESSAGE);
+                PanelPlanesUI panelPlanesUI = new PanelPlanesUI();
+                ControladorPlanes ctrlPlanes = new ControladorPlanes(panelPlanesUI, modelo);
+
+                ventanaMadre.setPanelCentral(panelPlanesUI);
                 break;
         }
     }
