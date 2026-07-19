@@ -210,6 +210,12 @@ public class ControladorAlumnos implements ActionListener {
         }
 
         if (cursadaSeleccionada != null) {
+
+            if (cursadaSeleccionada.estaAprobada() || cursadaSeleccionada.estaRegular()) {
+                JOptionPane.showMessageDialog(vista, "La materia " + nombreMateria + " ya se encuentra APROBADA o REGULARIZADA.\nNo se pueden registrar nuevos parciales.", "Acción Denegada", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             String notaStr = JOptionPane.showInputDialog(vista, "Ingrese la nota del Parcial (1-10):", "Registrar Parcial", JOptionPane.QUESTION_MESSAGE);
             if (notaStr == null || notaStr.trim().isEmpty()) return; // Canceló o dejó vacío
 
@@ -257,6 +263,12 @@ public class ControladorAlumnos implements ActionListener {
         }
 
         if (cursadaSeleccionada != null) {
+
+            if (cursadaSeleccionada.estaAprobada() || cursadaSeleccionada.getEstado() instanceof Inscripto) {
+                JOptionPane.showMessageDialog(vista, "La materia " + nombreMateria + " ya se encuentra APROBADA o no esta REGULARIZADA.\nNo se pueden registrar nuevos finales.", "Acción Denegada", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             String notaStr = JOptionPane.showInputDialog(vista, "Ingrese la nota del Final (1-10):", "Registrar Final", JOptionPane.QUESTION_MESSAGE);
             if (notaStr == null || notaStr.trim().isEmpty()) return; // Canceló o dejó vacío
 

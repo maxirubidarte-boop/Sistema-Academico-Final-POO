@@ -9,7 +9,6 @@ public class Inscripto implements EstadoCursada {
         }else {
             cursada.setNuevoEstado(new ParcialDesaprobado());
         }
-
     }
 
     @Override

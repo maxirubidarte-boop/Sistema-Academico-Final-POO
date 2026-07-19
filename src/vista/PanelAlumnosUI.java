@@ -35,7 +35,6 @@ public class PanelAlumnosUI extends JPanel {
     private JTable tablaCursadas;
     private DefaultTableModel modeloTablaCursadas;
     private JComboBox<String> comboMateriasAptas;
-    private JTextField txtNotaExamen;
     private JButton btnInscribirMateria, btnRendirParcial, btnRendirFinal, btnVolverLista;
 
 
@@ -159,7 +158,6 @@ public class PanelAlumnosUI extends JPanel {
         JSeparator separador = new JSeparator(SwingConstants.VERTICAL);
         separador.setPreferredSize(new Dimension(5, 25));
 
-        txtNotaExamen = new JTextField(4);
         btnRendirParcial = new JButton("Rendir Parcial");
         btnRendirFinal = new JButton("Rendir Final");
 
@@ -171,8 +169,6 @@ public class PanelAlumnosUI extends JPanel {
         panelOperaciones.add(comboMateriasAptas);
         panelOperaciones.add(btnInscribirMateria);
         panelOperaciones.add(separador);
-        panelOperaciones.add(new JLabel("Nota:"));
-        panelOperaciones.add(txtNotaExamen);
         panelOperaciones.add(btnRendirParcial);
         panelOperaciones.add(btnRendirFinal);
 
@@ -243,6 +239,8 @@ public class PanelAlumnosUI extends JPanel {
         txtLegajo.setVisible(true);
         lblCarreraForm.setVisible(false);
         comboCarreras.setVisible(false);
+
+        txtNombre.setEditable(true);
     }
 
     public void mostrarModoLista() {
@@ -294,9 +292,6 @@ public class PanelAlumnosUI extends JPanel {
     public void mostrarModoGestionCursadas(String nombre, String dni, String infoCarrera, ArrayList<String> materiasAptas) {
         lblInfoAlumnoCursadas.setText("Alumno: " + nombre + " (DNI: " + dni + ") | Carrera: " + infoCarrera);
 
-        // Limpiamos la nota por prolijidad
-        txtNotaExamen.setText("");
-
         // Llenamos el combo box de materias disponibles
         comboMateriasAptas.removeAllItems();
         if (materiasAptas.isEmpty()) {
@@ -331,7 +326,6 @@ public class PanelAlumnosUI extends JPanel {
     public String getMateriaSeleccionadaCombo() {
         return comboMateriasAptas.getSelectedItem() != null ? comboMateriasAptas.getSelectedItem().toString() : "";
     }
-    public String getTxtNotaExamen() { return txtNotaExamen.getText().trim(); }
 
     public JButton getBtnInscribirCarrera() { return btnInscribirCarrera; }
     public JButton getBtnVerificarEgreso() { return btnVerificarEgreso; }

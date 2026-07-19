@@ -12,7 +12,7 @@ public class VentanaPrincipalUI extends JFrame {
     public VentanaPrincipalUI() {
         // Configuración básica de la ventana de Swing
         setTitle("Sistema Académico UNTDF - Panel de Control Profesional");
-        setSize(1050, 600);
+        setSize(1300, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // La centra en la pantalla automáticamente
         setLayout(new BorderLayout());
