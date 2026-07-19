@@ -375,7 +375,7 @@ public class ModeloSistemaAcademico {
     }
 
     // GET CARRERAS
-    public HashMap<String, Carrera> getCarreras() {
+    public HashMap<String, Carrera> getMapaCarreras() {
         return carreras;
     }
 

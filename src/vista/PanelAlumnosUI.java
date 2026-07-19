@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class PanelAlumnosUI extends JPanel {
 
@@ -184,7 +185,7 @@ public class PanelAlumnosUI extends JPanel {
         navegador.show(contenedorDinamico, "FORMULARIO");
     }
 
-    public void mostrarModoInscripcionCarrera(String dni, String nombre, String[] carrerasDisponibles) {
+    public void mostrarModoInscripcionCarrera(String dni, String nombre, ArrayList<String> carrerasDisponibles) {
         lblTituloFormulario.setText("Inscripción Formal a Carrera");
 
         txtDni.setText(dni);

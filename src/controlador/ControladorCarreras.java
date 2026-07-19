@@ -135,7 +135,7 @@ public class ControladorCarreras implements ActionListener {
             }
 
             // Usamos el nombre como clave del HashMap (asumiendo estructura de tu modelo)
-            if (modelo.getCarreras().containsKey(nombre)) {
+            if (modelo.getMapaCarreras().containsKey(nombre)) {
                 JOptionPane.showMessageDialog(vista, "Ya existe una carrera registrada con el nombre '" + nombre + "'", "Carrera Duplicada", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -147,7 +147,7 @@ public class ControladorCarreras implements ActionListener {
         } else {
             // CAMINO B: MODIFICAR CARRERA EXISTENTE (El código NO se edita)
             Carrera carreraAEditar = null;
-            for (Carrera c : modelo.getCarreras().values()) {
+            for (Carrera c : modelo.getMapaCarreras().values()) {
                 if (c.getCodigoCarrera() == codigo) {
                     carreraAEditar = c;
                     break;
@@ -158,16 +158,16 @@ public class ControladorCarreras implements ActionListener {
                 String nombreViejo = carreraAEditar.getNombre();
 
                 if (!nombreViejo.equals(nombre)) {
-                    if (modelo.getCarreras().containsKey(nombre)) {
+                    if (modelo.getMapaCarreras().containsKey(nombre)) {
                         JOptionPane.showMessageDialog(vista, "No se puede renombrar. Ya existe otra carrera llamada '" + nombre + "'", "Nombre Duplicado", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     // Actualizamos clave del mapa en el modelo
-                    modelo.getCarreras().remove(nombreViejo);
+                    modelo.getMapaCarreras().remove(nombreViejo);
                 }
 
                 carreraAEditar.setNombre(nombre);
-                modelo.getCarreras().put(nombre, carreraAEditar);
+                modelo.getMapaCarreras().put(nombre, carreraAEditar);
 
                 JOptionPane.showMessageDialog(vista, "Carrera modificada con éxito.", "Operación Exitosa", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -217,8 +217,8 @@ public class ControladorCarreras implements ActionListener {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             // Remueve la carrera del modelo (usando la clave que es el nombre)
-            if (modelo.getCarreras().containsKey(nombreCarrera)) {
-                modelo.getCarreras().remove(nombreCarrera);
+            if (modelo.getMapaCarreras().containsKey(nombreCarrera)) {
+                modelo.getMapaCarreras().remove(nombreCarrera);
                 JOptionPane.showMessageDialog(vista, "Carrera eliminada exitosamente.", "Baja Exitosa", JOptionPane.INFORMATION_MESSAGE);
                 this.actualizarTabla();
             } else {
@@ -235,7 +235,7 @@ public class ControladorCarreras implements ActionListener {
         }
 
         String nombreCarrera = vista.getModeloTabla().getValueAt(filaSeleccionada, 0).toString();
-        carreraSeleccionada = modelo.getCarreras().get(nombreCarrera);
+        carreraSeleccionada = modelo.getMapaCarreras().get(nombreCarrera);
 
         if (carreraSeleccionada != null) {
             enModoPlanDeEstudio = true;
@@ -349,7 +349,7 @@ public class ControladorCarreras implements ActionListener {
     // --- AUXILIARES Y PAGINACIÓN ---
 
     private boolean existeCodigoCarrera(int codigoBuscado) {
-        for (Carrera c : modelo.getCarreras().values()) {
+        for (Carrera c : modelo.getMapaCarreras().values()) {
             if (c.getCodigoCarrera() == codigoBuscado) {
                 return true;
             }
@@ -411,7 +411,7 @@ public class ControladorCarreras implements ActionListener {
         // =====================================================================
         dtm.setColumnIdentifiers(new String[]{"Nombre de Carrera", "Codigo de Carrera", "Plan de Estudio", "Numero de Inscriptos"});
 
-        List<Carrera> listaCarreras = new ArrayList<>(modelo.getCarreras().values());
+        List<Carrera> listaCarreras = new ArrayList<>(modelo.getMapaCarreras().values());
 
         // Las ordenamos por código
         listaCarreras.sort((c1, c2) -> Integer.compare(c1.getCodigoCarrera(), c2.getCodigoCarrera()));
@@ -459,7 +459,7 @@ public class ControladorCarreras implements ActionListener {
     }
 
     private void paginaSiguiente() {
-        int totalRegistros = modelo.getCarreras().size();
+        int totalRegistros = modelo.getMapaCarreras().size();
         int paginasMaximas = (int) Math.ceil((double) totalRegistros / FILAS_POR_PAGINA);
 
         if (paginaActual < paginasMaximas) {

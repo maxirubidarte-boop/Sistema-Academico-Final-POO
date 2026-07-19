@@ -1,5 +1,6 @@
 package controlador;
 
+import modelo.Carrera;
 import modelo.ModeloSistemaAcademico;
 import modelo.Alumno;
 import modelo.PlanDeEstudio;
@@ -47,105 +48,19 @@ public class ControladorAlumnos implements ActionListener {
                 break;
 
             case "Editar Seleccionado":
-                int filaEdicion = vista.getTablaAlumnos().getSelectedRow();
-                if (filaEdicion == -1) {
-                    JOptionPane.showMessageDialog(vista, "Seleccione un alumno de la tabla para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                String dniEdit = vista.getModeloTabla().getValueAt(filaEdicion, 0).toString();
-                String legajoEdit = vista.getModeloTabla().getValueAt(filaEdicion, 1).toString();
-                String nombreEdit = vista.getModeloTabla().getValueAt(filaEdicion, 2).toString();
-
-                esAlta = false;
-                esInscripcion = false;
-                vista.mostrarModoEdicion(dniEdit, legajoEdit, nombreEdit);
+                editarSeleccionado();
                 break;
 
             case "Verificar Egreso":
-                int filaEgreso = vista.getTablaAlumnos().getSelectedRow();
-                if (filaEgreso == -1) {
-                    JOptionPane.showMessageDialog(vista, "Seleccione un alumno para verificar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                String dniEgreso = vista.getModeloTabla().getValueAt(filaEgreso, 0).toString();
-                Alumno alumnoEgreso = modelo.getAlumno(dniEgreso);
-
-                if (alumnoEgreso != null) {
-                    boolean estaGraduado = false;
-
-                    // 🛡️ CONTROL DE EGRESO SEGURO
-                    // Si el alumno no tiene carrera asignada en el modelo, es imposible que esté graduado
-                    if (alumnoEgreso.getCarreraActual() != null) {
-                        // Le pedimos al modelo el plan global que armaste en tu simulación (ID: 123 para Sistemas)
-                        // O evaluamos dinámicamente según la carrera que tenga
-                        PlanDeEstudio planSistemas = modelo.getPlan(123);
-                        PlanDeEstudio planTurismo = modelo.getPlan(456);
-
-                        String nombreCarrera = alumnoEgreso.getCarreraActual().getNombre();
-
-                        if (nombreCarrera.contains("Sistemas") && planSistemas != null) {
-                            estaGraduado = planSistemas.estaGraduado(alumnoEgreso);
-                        } else if (nombreCarrera.contains("Turismo") && planTurismo != null) {
-                            estaGraduado = planTurismo.estaGraduado(alumnoEgreso);
-                        }
-                    }
-
-                    String msj = "🎓 Control de Egreso — UNTDF\n\n";
-                    msj += "Alumno: " + alumnoEgreso.getNombre() + "\n";
-                    msj += "Carrera: " + (alumnoEgreso.getCarreraActual() != null ? alumnoEgreso.getCarreraActual().getNombre() : "No inscripto") + "\n";
-                    msj += "¿Cumple condiciones de graduación?: " + (estaGraduado ? "SÍ 🎉 ¡Graduado!" : "NO 📚 (Cursada incompleta)");
-
-                    JOptionPane.showMessageDialog(vista, msj, "Resultado de Auditoría", JOptionPane.INFORMATION_MESSAGE);
-                }
+                verificarEgreso();
                 break;
 
             case "Inscribir a Carrera":
-                int filaInsc = vista.getTablaAlumnos().getSelectedRow();
-                if (filaInsc == -1) {
-                    JOptionPane.showMessageDialog(vista, "Seleccione un alumno para inscribir.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                // 1. Sacamos los datos de la fila seleccionada
-                String dniInsc = vista.getModeloTabla().getValueAt(filaInsc, 0).toString();
-                String nombreInsc = vista.getModeloTabla().getValueAt(filaInsc, 2).toString();
-                String carreraDeLaTabla = vista.getModeloTabla().getValueAt(filaInsc, 3).toString();
-
-                // 🛡️ CONTROL DE RE-INSCRIPCIÓN
-                // Si la columna 3 dice cualquier cosa que NO sea "No inscripto", significa que ya tiene carrera
-                if (!carreraDeLaTabla.equals("No inscripto")) {
-                    JOptionPane.showMessageDialog(vista,
-                            "El alumno " + nombreInsc + " ya está matriculado en:\n" + carreraDeLaTabla +
-                                    "\n\nPara cambiarlo de carrera, primero debe procesarse la baja académica.",
-                            "Inscripción Duplicada",
-                            JOptionPane.WARNING_MESSAGE);
-                    return; // 🛑 Frena acá, no muestra el formulario de inscripción
-                }
-
-                // Si está libre, avanzamos al formulario normalmente
-                esAlta = false;
-                esInscripcion = true;
-
-                String[] carrerasDisponibles = {"Licenciatura en Sistemas", "Licenciatura en Turismo"};
-                vista.mostrarModoInscripcionCarrera(dniInsc, nombreInsc, carrerasDisponibles);
+                inscribirACarrera();
                 break;
 
             case "Eliminar":
-                int filaEliminar = vista.getTablaAlumnos().getSelectedRow();
-                if (filaEliminar == -1) {
-                    JOptionPane.showMessageDialog(vista, "Seleccione qué alumno desea dar de baja.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                String dniEliminar = vista.getModeloTabla().getValueAt(filaEliminar, 0).toString();
-                int seguro = JOptionPane.showConfirmDialog(vista, "¿Está seguro de dar de baja al DNI " + dniEliminar + "?", "Confirmar baja", JOptionPane.YES_NO_OPTION);
-
-                if (seguro == JOptionPane.YES_OPTION) {
-                    modelo.eliminarAlumnoDelSistema(dniEliminar); // Usa tu método real
-                    refrescarTablaPaginada();
-                }
+                eliminarAlumno();
                 break;
 
             case "Guardar":
@@ -173,6 +88,108 @@ public class ControladorAlumnos implements ActionListener {
                 }
                 break;
         }
+    }
+
+    private void eliminarAlumno(){
+        int filaEliminar = vista.getTablaAlumnos().getSelectedRow();
+        if (filaEliminar == -1) {
+            JOptionPane.showMessageDialog(vista, "Seleccione qué alumno desea dar de baja.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String dniEliminar = vista.getModeloTabla().getValueAt(filaEliminar, 0).toString();
+        int seguro = JOptionPane.showConfirmDialog(vista, "¿Está seguro de dar de baja al DNI " + dniEliminar + "?", "Confirmar baja", JOptionPane.YES_NO_OPTION);
+
+        if (seguro == JOptionPane.YES_OPTION) {
+            modelo.eliminarAlumnoDelSistema(dniEliminar); // Usa tu método real
+            refrescarTablaPaginada();
+        }
+    }
+
+    private void inscribirACarrera (){
+        int filaInsc = vista.getTablaAlumnos().getSelectedRow();
+        if (filaInsc == -1) {
+            JOptionPane.showMessageDialog(vista, "Seleccione un alumno para inscribir.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 1. Sacamos los datos de la fila seleccionada
+        String dniInsc = vista.getModeloTabla().getValueAt(filaInsc, 0).toString();
+        String nombreInsc = vista.getModeloTabla().getValueAt(filaInsc, 2).toString();
+        String carreraDeLaTabla = vista.getModeloTabla().getValueAt(filaInsc, 3).toString();
+
+        // CONTROL DE RE-INSCRIPCIÓN
+        // Si la columna 3 dice cualquier cosa que NO sea "No inscripto", significa que ya tiene carrera
+        if (!carreraDeLaTabla.equals("No inscripto")) {
+            JOptionPane.showMessageDialog(vista,
+                    "El alumno " + nombreInsc + " ya está matriculado en:\n" + carreraDeLaTabla +
+                            "\n\nPara cambiarlo de carrera, primero debe procesarse la baja académica.",
+                    "Inscripción Duplicada",
+                    JOptionPane.WARNING_MESSAGE);
+            return; // Frena acá, no muestra el formulario de inscripción
+        }
+
+        // Si está libre, avanzamos al formulario normalmente
+        esAlta = false;
+        esInscripcion = true;
+
+        ArrayList<String> carrerasDisponibles =new ArrayList<>();
+
+        ArrayList<Carrera> carreras = new ArrayList<>(modelo.getMapaCarreras().values());
+        for (Carrera c: carreras){
+            carrerasDisponibles.add(c.getNombre());
+        }
+        vista.mostrarModoInscripcionCarrera(dniInsc, nombreInsc, carrerasDisponibles);
+    }
+
+    private void verificarEgreso(){
+        int filaEgreso = vista.getTablaAlumnos().getSelectedRow();
+        if (filaEgreso == -1) {
+            JOptionPane.showMessageDialog(vista, "Seleccione un alumno para verificar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String dniEgreso = vista.getModeloTabla().getValueAt(filaEgreso, 0).toString();
+        Alumno alumnoEgreso = modelo.getAlumno(dniEgreso);
+
+        if (alumnoEgreso != null) {
+            boolean estaGraduado = false;
+
+            // CONTROL DE EGRESO SEGURO
+            // Si el alumno no tiene carrera asignada en el modelo, es imposible que esté graduado
+            if (alumnoEgreso.getCarreraActual() != null) {
+                // Le pedimos al modelo el plan global
+                // O evaluamos dinámicamente según la carrera que tenga
+                PlanDeEstudio planDelAlumno = alumnoEgreso.getCarreraActual().getPlanDeEstudio();
+
+                if (planDelAlumno.estaGraduado(alumnoEgreso)){
+                    estaGraduado = true;
+                }
+            }
+
+            String msj = "🎓 Control de Egreso — UNTDF\n\n";
+            msj += "Alumno: " + alumnoEgreso.getNombre() + "\n";
+            msj += "Carrera: " + (alumnoEgreso.getCarreraActual() != null ? alumnoEgreso.getCarreraActual().getNombre() : "No inscripto") + "\n";
+            msj += "¿Cumple condiciones de graduación?: " + (estaGraduado ? "SÍ 🎉 ¡Graduado!" : "NO 📚 (Cursada incompleta)");
+
+            JOptionPane.showMessageDialog(vista, msj, "Resultado de Auditoría", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void editarSeleccionado(){
+        int filaEdicion = vista.getTablaAlumnos().getSelectedRow();
+        if (filaEdicion == -1) {
+            JOptionPane.showMessageDialog(vista, "Seleccione un alumno de la tabla para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String dniEdit = vista.getModeloTabla().getValueAt(filaEdicion, 0).toString();
+        String legajoEdit = vista.getModeloTabla().getValueAt(filaEdicion, 1).toString();
+        String nombreEdit = vista.getModeloTabla().getValueAt(filaEdicion, 2).toString();
+
+        esAlta = false;
+        esInscripcion = false;
+        vista.mostrarModoEdicion(dniEdit, legajoEdit, nombreEdit);
     }
 
     private void ejecutarGuardado() {
