@@ -18,6 +18,7 @@ public class PanelAlumnosUI extends JPanel {
     private JButton btnAgregar, btnEditar, btnEliminar, btnInscribirCarrera, btnVerificarEgreso;
     private JButton btnAnterior, btnSiguiente;
     private JLabel lblPaginacion;
+    private JButton btnGestionarCursadas;
 
     // Componentes Modo FORMULARIO (Reutilizable)
     private JPanel panelFormulario;
@@ -27,16 +28,32 @@ public class PanelAlumnosUI extends JPanel {
     private JButton btnGuardar, btnCancelar;
     private JLabel lblTituloFormulario;
 
+    // Componentes Modo GESTIÓN DE CURSADAS
+    private JPanel panelCursadas;
+    private JLabel lblTituloCursadas;
+    private JLabel lblInfoAlumnoCursadas;
+    private JTable tablaCursadas;
+    private DefaultTableModel modeloTablaCursadas;
+    private JComboBox<String> comboMateriasAptas;
+    private JTextField txtNotaExamen;
+    private JButton btnInscribirMateria, btnRendirParcial, btnRendirFinal, btnVolverLista;
+
+
     public PanelAlumnosUI() {
         setLayout(new BorderLayout());
         navegador = new CardLayout();
         contenedorDinamico = new JPanel(navegador);
 
+        btnGestionarCursadas = new JButton("Gestionar Cursadas");
+        btnGestionarCursadas.setFocusPainted(false);
+
         armarPanelLista();
         armarPanelFormulario();
+        armarPanelCursada();
 
         contenedorDinamico.add(panelLista, "LISTA");
         contenedorDinamico.add(panelFormulario, "FORMULARIO");
+        contenedorDinamico.add(panelCursadas,"CURSADA");
 
         add(contenedorDinamico, BorderLayout.CENTER);
         mostrarModoLista();
@@ -95,12 +112,79 @@ public class PanelAlumnosUI extends JPanel {
         panelAcciones.add(btnAgregar);
         panelAcciones.add(btnEditar);
         panelAcciones.add(btnInscribirCarrera);
+        panelAcciones.add(btnGestionarCursadas);
         panelAcciones.add(btnVerificarEgreso);
         panelAcciones.add(btnEliminar);
 
         panelInferior.add(panelPaginacion, BorderLayout.WEST);
         panelInferior.add(panelAcciones, BorderLayout.EAST);
         panelLista.add(panelInferior, BorderLayout.SOUTH);
+    }
+
+    private void armarPanelCursada(){
+        panelCursadas = new JPanel(new BorderLayout());
+
+        // Panel Superior: Título dinámico e Información del Alumno seleccionado
+        JPanel panelNorte = new JPanel(new GridLayout(2,1));
+        panelNorte.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        lblTituloCursadas = new JLabel("Administración de Cursadas", SwingConstants.CENTER);
+        lblTituloCursadas.setFont(new Font("Arial", Font.BOLD, 18));
+
+        lblInfoAlumnoCursadas = new JLabel("Alumno: - | DNI: -", SwingConstants.CENTER);
+        lblInfoAlumnoCursadas.setFont(new Font("Arial", Font.ITALIC, 14));
+
+        panelNorte.add(lblTituloCursadas);
+        panelNorte.add(lblInfoAlumnoCursadas);
+        panelCursadas.add(panelNorte, BorderLayout.NORTH);
+
+        // Panel Central: Tabla con las cursadas actuales de ese alumno
+        String[] columnasCursada = {"Materia", "Estado Académico"};
+        modeloTablaCursadas = new DefaultTableModel(columnasCursada, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+        tablaCursadas = new JTable(modeloTablaCursadas);
+        panelCursadas.add(new JScrollPane(tablaCursadas), BorderLayout.CENTER);
+
+        // Panel Inferior: Controles de Inscripción, Exámenes y Volver
+        JPanel panelSur = new JPanel(new BorderLayout());
+
+        // Subpanel de operaciones (Inscribir y Rendir)
+        JPanel panelOperaciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+
+        comboMateriasAptas = new JComboBox<>();
+        btnInscribirMateria = new JButton("Inscribir a Materia");
+
+        JSeparator separador = new JSeparator(SwingConstants.VERTICAL);
+        separador.setPreferredSize(new Dimension(5, 25));
+
+        txtNotaExamen = new JTextField(4);
+        btnRendirParcial = new JButton("Rendir Parcial");
+        btnRendirFinal = new JButton("Rendir Final");
+
+        btnInscribirMateria.setFocusPainted(false);
+        btnRendirParcial.setFocusPainted(false);
+        btnRendirFinal.setFocusPainted(false);
+
+        panelOperaciones.add(new JLabel("Materias disponibles:"));
+        panelOperaciones.add(comboMateriasAptas);
+        panelOperaciones.add(btnInscribirMateria);
+        panelOperaciones.add(separador);
+        panelOperaciones.add(new JLabel("Nota:"));
+        panelOperaciones.add(txtNotaExamen);
+        panelOperaciones.add(btnRendirParcial);
+        panelOperaciones.add(btnRendirFinal);
+
+        // Subpanel de navegación (Derecha)
+        JPanel panelNavegacion = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+        btnVolverLista = new JButton("Volver a Lista");
+        btnVolverLista.setFocusPainted(false);
+        panelNavegacion.add(btnVolverLista);
+
+        panelSur.add(panelOperaciones, BorderLayout.WEST);
+        panelSur.add(panelNavegacion, BorderLayout.EAST);
+        panelCursadas.add(panelSur, BorderLayout.SOUTH);
     }
 
     private void armarPanelFormulario() {
@@ -207,6 +291,27 @@ public class PanelAlumnosUI extends JPanel {
         navegador.show(contenedorDinamico, "FORMULARIO");
     }
 
+    public void mostrarModoGestionCursadas(String nombre, String dni, String infoCarrera, ArrayList<String> materiasAptas) {
+        lblInfoAlumnoCursadas.setText("Alumno: " + nombre + " (DNI: " + dni + ") | Carrera: " + infoCarrera);
+
+        // Limpiamos la nota por prolijidad
+        txtNotaExamen.setText("");
+
+        // Llenamos el combo box de materias disponibles
+        comboMateriasAptas.removeAllItems();
+        if (materiasAptas.isEmpty()) {
+            comboMateriasAptas.addItem("Sin materias disponibles");
+            btnInscribirMateria.setEnabled(false);
+        } else {
+            for (String mat : materiasAptas) {
+                comboMateriasAptas.addItem(mat);
+            }
+            btnInscribirMateria.setEnabled(true);
+        }
+
+        navegador.show(contenedorDinamico, "CURSADA");
+    }
+
     // --- GETTERS ---
     public DefaultTableModel getModeloTabla() { return modeloTabla; }
     public JTable getTablaAlumnos() { return tablaAlumnos; }
@@ -215,7 +320,19 @@ public class PanelAlumnosUI extends JPanel {
     public String getTxtNombre() { return txtNombre.getText().trim(); }
     public JComboBox<String> getComboCarreras() { return comboCarreras; }
 
-    // Getters para que el controlador escuche los botones nuevos
+    public DefaultTableModel getModeloTablaCursadas() { return modeloTablaCursadas; }
+    public JTable getTablaCursadas() { return tablaCursadas; }
+    public JButton getBtnGestionarCursadas() { return btnGestionarCursadas; }
+    public JButton getBtnInscribirMateria() { return btnInscribirMateria; }
+    public JButton getBtnRendirParcial() { return btnRendirParcial; }
+    public JButton getBtnRendirFinal() { return btnRendirFinal; }
+    public JButton getBtnVolverLista() { return btnVolverLista; }
+
+    public String getMateriaSeleccionadaCombo() {
+        return comboMateriasAptas.getSelectedItem() != null ? comboMateriasAptas.getSelectedItem().toString() : "";
+    }
+    public String getTxtNotaExamen() { return txtNotaExamen.getText().trim(); }
+
     public JButton getBtnInscribirCarrera() { return btnInscribirCarrera; }
     public JButton getBtnVerificarEgreso() { return btnVerificarEgreso; }
 
@@ -233,5 +350,11 @@ public class PanelAlumnosUI extends JPanel {
         btnSiguiente.addActionListener(listener);
         btnGuardar.addActionListener(listener);
         btnCancelar.addActionListener(listener);
+
+        btnGestionarCursadas.addActionListener(listener);
+        btnInscribirMateria.addActionListener(listener);
+        btnRendirParcial.addActionListener(listener);
+        btnRendirFinal.addActionListener(listener);
+        btnVolverLista.addActionListener(listener);
     }
 }
