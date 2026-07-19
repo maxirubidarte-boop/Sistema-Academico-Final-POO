@@ -1,15 +1,11 @@
 package controlador;
 
-import modelo.Carrera;
-import modelo.ModeloSistemaAcademico;
-import modelo.Alumno;
-import modelo.PlanDeEstudio;
+import modelo.*;
 import vista.PanelAlumnosUI;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JOptionPane;
 
 public class ControladorAlumnos implements ActionListener {
@@ -24,6 +20,9 @@ public class ControladorAlumnos implements ActionListener {
     // Banderas de estado para el botón "Guardar"
     private boolean esAlta = true;
     private boolean esInscripcion = false; //  Controla si el guardado es para una carrera
+
+    //referencia al alumno que se está gestionando
+    private String dniAlumnoActualCursadas = "";
 
     public ControladorAlumnos(PanelAlumnosUI vista, ModeloSistemaAcademico modelo) {
         this.vista = vista;
@@ -71,6 +70,26 @@ public class ControladorAlumnos implements ActionListener {
                 vista.mostrarModoLista();
                 break;
 
+            case "Gestionar Cursadas":
+                prepararPantallaCursadas();
+                break;
+
+            case "Inscribir a Materia":
+                inscribirAMateria();
+                break;
+
+            case "Rendir Parcial":
+                rendirParcial();
+                break;
+
+            case "Rendir Final":
+                rendirFinal();
+                break;
+
+            case "Volver a Lista":
+                volverALista();
+                break;
+
             case "< Anterior":
                 if (paginaActual > 1) {
                     paginaActual--;
@@ -87,6 +106,180 @@ public class ControladorAlumnos implements ActionListener {
                     refrescarTablaPaginada();
                 }
                 break;
+        }
+    }
+
+    private void prepararPantallaCursadas(){
+        int filaSeleccionada = vista.getTablaAlumnos().getSelectedRow();
+        if (filaSeleccionada == -1){
+            JOptionPane.showMessageDialog(vista, "Seleccione un alumno para gestionar sus cursadas.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        dniAlumnoActualCursadas = vista.getModeloTabla().getValueAt(filaSeleccionada, 0).toString();
+        Alumno alumno = modelo.getAlumno(dniAlumnoActualCursadas);
+
+        if (alumno == null){
+            return;
+        }
+
+        refrescarDatosYAptasCursadas(alumno);
+    }
+
+    private void refrescarDatosYAptasCursadas(Alumno alumno) {
+        String nombreCarrera = (alumno.getCarreraActual() != null) ? alumno.getCarreraActual().getNombre() : "No inscripto";
+
+        // Mapeamos dinámicamente las Materias a un ArrayList<String> con sus nombres
+        ArrayList<String> nombresMateriasAptas = new ArrayList<>();
+        if (alumno.getCarreraActual() != null && alumno.getCarreraActual().getPlanDeEstudio() != null) {
+            ArrayList<Materia> materiasAptasObjetos = alumno.getMateriasAptasACursar();
+            for (Materia m : materiasAptasObjetos) {
+                nombresMateriasAptas.add(m.getNombre());
+            }
+        }
+
+        // Poblar la tabla de cursadas actuales del alumno
+        vista.getModeloTablaCursadas().setRowCount(0);
+
+        if (alumno.getCursadas() != null) {
+            for (Cursada c : alumno.getCursadas()){
+                String estadoStr = c.getEstado().getClass().getSimpleName();
+                if (c.estaAprobada()) estadoStr = "APROBADA";
+                else if (c.estaRegular()) estadoStr = "REGULAR";
+
+                Object[] fila = { c.getMateria().getNombre(), estadoStr };
+                vista.getModeloTablaCursadas().addRow(fila);
+            }
+        }
+
+        // Le pasamos la lista limpia de Strings a la vista sin tocar la UI
+        vista.mostrarModoGestionCursadas(alumno.getNombre(), alumno.getDni(), nombreCarrera, nombresMateriasAptas);
+    }
+
+
+    private void inscribirAMateria(){
+        Alumno alumno = modelo.getAlumno(dniAlumnoActualCursadas);
+        String nombreMateria = vista.getMateriaSeleccionadaCombo();
+
+        if (nombreMateria.isEmpty()) {
+            JOptionPane.showMessageDialog(vista, "Seleccione una materia válida.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Materia materiaSelecionada = null;
+        for (Materia m: alumno.getMateriasAptasACursar()){
+            if (m.getNombre().equals(nombreMateria)){
+                materiaSelecionada = m;
+                break;
+            }
+        }
+
+        if (materiaSelecionada != null){
+            alumno.inscribirACursada(materiaSelecionada);
+            JOptionPane.showMessageDialog(vista, "Inscripción exitosa a " + nombreMateria, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            refrescarDatosYAptasCursadas(alumno);
+        }
+    }
+
+    private void volverALista (){
+        dniAlumnoActualCursadas = "";
+        refrescarTablaPaginada();
+        vista.mostrarModoLista();
+    }
+
+    private void rendirParcial (){
+        // 1. Validar que haya una cursada seleccionada en la tabla de cursadas
+        int filaSeleccionada = vista.getTablaCursadas().getSelectedRow();
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(vista, "Seleccione una cursada de la tabla para registrar el parcial.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Alumno alumno = modelo.getAlumno(dniAlumnoActualCursadas);
+        if (alumno == null) return;
+
+        // 2. Recuperar el nombre de la materia de la fila seleccionada
+        String nombreMateria = vista.getModeloTablaCursadas().getValueAt(filaSeleccionada, 0).toString();
+        Cursada cursadaSeleccionada = null;
+
+        for (Cursada c:alumno.getCursadas()){
+            if (c.getMateria().getNombre().equals(nombreMateria)){
+                cursadaSeleccionada = c;
+                break;
+            }
+        }
+
+        if (cursadaSeleccionada != null) {
+            String notaStr = JOptionPane.showInputDialog(vista, "Ingrese la nota del Parcial (1-10):", "Registrar Parcial", JOptionPane.QUESTION_MESSAGE);
+            if (notaStr == null || notaStr.trim().isEmpty()) return; // Canceló o dejó vacío
+
+            try {
+                int nota = Integer.parseInt(notaStr);
+                if (nota < 1 || nota > 10) {
+                    JOptionPane.showMessageDialog(vista, "La nota debe estar entre 1 y 10.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                boolean aprueba = (nota >= 4);
+
+                // Ejecuta la evaluación
+                cursadaSeleccionada.rendirParcial(aprueba);
+
+                JOptionPane.showMessageDialog(vista, "Examen parcial registrado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                refrescarDatosYAptasCursadas(alumno); // Refresca la tabla en caliente
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(vista, "Ingrese un número entero válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void rendirFinal (){
+        // 1. Validar que haya una cursada seleccionada en la tabla de cursadas
+        int filaSeleccionada = vista.getTablaCursadas().getSelectedRow();
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(vista, "Seleccione una cursada de la tabla para registrar el final.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Alumno alumno = modelo.getAlumno(dniAlumnoActualCursadas);
+        if (alumno == null) return;
+
+        // 2. Recuperar el nombre de la materia de la fila seleccionada
+        String nombreMateria = vista.getModeloTablaCursadas().getValueAt(filaSeleccionada, 0).toString();
+        Cursada cursadaSeleccionada = null;
+
+        for (Cursada c:alumno.getCursadas()){
+            if (c.getMateria().getNombre().equals(nombreMateria)){
+                cursadaSeleccionada = c;
+                break;
+            }
+        }
+
+        if (cursadaSeleccionada != null) {
+            String notaStr = JOptionPane.showInputDialog(vista, "Ingrese la nota del Final (1-10):", "Registrar Final", JOptionPane.QUESTION_MESSAGE);
+            if (notaStr == null || notaStr.trim().isEmpty()) return; // Canceló o dejó vacío
+
+            try {
+                int nota = Integer.parseInt(notaStr);
+                if (nota < 1 || nota > 10) {
+                    JOptionPane.showMessageDialog(vista, "La nota debe estar entre 1 y 10.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                boolean aprueba = (nota >= 6);
+
+                // Ejecuta la evaluación
+                if (aprueba){
+                    cursadaSeleccionada.rendirFinal();
+                    JOptionPane.showMessageDialog(vista, "Examen Final registrado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    refrescarDatosYAptasCursadas(alumno); // Refresca la tabla en caliente
+                }else {
+                    JOptionPane.showMessageDialog(vista, "Examen Final Desaprobado.", "Nota Insuficiente", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(vista, "Ingrese un número entero válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -196,11 +389,18 @@ public class ControladorAlumnos implements ActionListener {
         // Si estamos inscribiendo a una carrera, la lógica es totalmente distinta
         if (esInscripcion) {
             String dni = vista.getTxtDni();
-            String carreraSeleccionada = vista.getComboCarreras().getSelectedItem().toString();
+
+            Object itemSeleccionado = vista.getComboCarreras().getSelectedItem();
+
+            if (itemSeleccionado == null) {
+                JOptionPane.showMessageDialog(vista, "Seleccione una carrera válida de la lista.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String carreraSeleccionada = itemSeleccionado.toString();
+
 
             // Ejecuta tu lógica real del backend
             modelo.inscribirAlumnoACarrera(dni, carreraSeleccionada);
-
             JOptionPane.showMessageDialog(vista, "¡Inscripción registrada con éxito en " + carreraSeleccionada + "!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
             esInscripcion = false; // Reseteamos la bandera
@@ -293,7 +493,7 @@ public class ControladorAlumnos implements ActionListener {
     private void refrescarTablaPaginada() {
         vista.getModeloTabla().setRowCount(0); // Limpia la tabla por completo
 
-        List<Alumno> listaCompleta = new ArrayList<>(modelo.getAlumnosDelPadron().values());
+        ArrayList<Alumno> listaCompleta = new ArrayList<>(modelo.getAlumnosDelPadron().values());
         int totalAlumnos = listaCompleta.size();
 
         int totalPaginas = (int) Math.ceil((double) totalAlumnos / FILAS_POR_PAGINA);

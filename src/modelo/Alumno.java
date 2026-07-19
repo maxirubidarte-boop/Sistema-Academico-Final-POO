@@ -103,6 +103,9 @@ public class Alumno extends Persona {
         }
     }
 
+    public ArrayList<Cursada> getCursadas(){
+        return cursadas;
+    }
 
     public ArrayList<Materia> getMateriasAptasACursar(){
         ArrayList<Materia> aptas = new ArrayList<>();

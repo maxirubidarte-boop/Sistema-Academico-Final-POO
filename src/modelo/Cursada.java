@@ -40,5 +40,9 @@ public class Cursada {
 
     public Alumno getAlumno (){return alumno;}
 
+    public EstadoCursada getEstado (){
+        return estadoActual;
+    }
+
 
 }
