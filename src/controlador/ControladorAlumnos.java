@@ -31,6 +31,14 @@ public class ControladorAlumnos implements ActionListener {
         // Ponemos al controlador a escuchar TODOS los componentes de la vista
         this.vista.escucharComponentes(this);
 
+        // conectamos el metodo que actualiza el boton con el listener de la tabla
+        this.vista.getTablaAlumnos().getSelectionModel().addListSelectionListener(e -> {
+            // e.getValueIsAdjusting() evita que el código se ejecute dos veces (al hacer clic y al soltar)
+            if (!e.getValueIsAdjusting()) {
+                actualizarBotonCarreraSegunSeleccion();
+            }
+        });
+
         // Renderizamos la tabla por primera vez
         refrescarTablaPaginada();
     }
@@ -55,6 +63,7 @@ public class ControladorAlumnos implements ActionListener {
                 break;
 
             case "Inscribir a Carrera":
+            case "Dar Baja de Carrera":
                 inscribirACarrera();
                 break;
 
@@ -156,6 +165,27 @@ public class ControladorAlumnos implements ActionListener {
         vista.mostrarModoGestionCursadas(alumno.getNombre(), alumno.getDni(), nombreCarrera, nombresMateriasAptas);
     }
 
+    private void actualizarBotonCarreraSegunSeleccion(){
+        int filaSeleccionada = vista.getTablaAlumnos().getSelectedRow();
+
+        // si no hay nadie seleccionado, dejamos el texto por defecto y salimos
+        if (filaSeleccionada == -1){
+            vista.getBtnInscribirCarrera().setText("Inscribir a Carrera");
+            return;
+        }
+
+        // Recuperamos el DNI de la fila seleccionada
+        String dni = vista.getModeloTabla().getValueAt(filaSeleccionada, 0).toString();
+        Alumno alumno = modelo.getAlumno(dni);
+
+        if (alumno != null){
+            if (alumno.getCarreraActual() != null){
+                vista.getBtnInscribirCarrera().setText("Dar Baja de Carrera");
+            }else {
+                vista.getBtnInscribirCarrera().setText("Inscribir a Carrera");
+            }
+        }
+    }
 
     private void inscribirAMateria(){
         Alumno alumno = modelo.getAlumno(dniAlumnoActualCursadas);
@@ -311,39 +341,56 @@ public class ControladorAlumnos implements ActionListener {
         }
     }
 
-    private void inscribirACarrera (){
+    private void inscribirACarrera() {
         int filaInsc = vista.getTablaAlumnos().getSelectedRow();
+
+        // 1. Validación básica de selección
         if (filaInsc == -1) {
-            JOptionPane.showMessageDialog(vista, "Seleccione un alumno para inscribir.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(vista, "Seleccione un alumno para gestionar su carrera.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // 1. Sacamos los datos de la fila seleccionada
+        // 2. Recuperamos las credenciales de la fila de la tabla
         String dniInsc = vista.getModeloTabla().getValueAt(filaInsc, 0).toString();
         String nombreInsc = vista.getModeloTabla().getValueAt(filaInsc, 2).toString();
-        String carreraDeLaTabla = vista.getModeloTabla().getValueAt(filaInsc, 3).toString();
 
-        // CONTROL DE RE-INSCRIPCIÓN
-        // Si la columna 3 dice cualquier cosa que NO sea "No inscripto", significa que ya tiene carrera
-        if (!carreraDeLaTabla.equals("No inscripto")) {
-            JOptionPane.showMessageDialog(vista,
-                    "El alumno " + nombreInsc + " ya está matriculado en:\n" + carreraDeLaTabla +
-                            "\n\nPara cambiarlo de carrera, primero debe procesarse la baja académica.",
-                    "Inscripción Duplicada",
-                    JOptionPane.WARNING_MESSAGE);
-            return; // Frena acá, no muestra el formulario de inscripción
+        // 3. Vamos a buscar al Alumno real al modelo
+        Alumno alumno = modelo.getAlumno(dniInsc);
+        if (alumno == null) return;
+
+        // CASO A: EL ALUMNO YA TIENE CARRERA -> PROCESAMOS LA BAJA
+        if (alumno.getCarreraActual() != null) {
+            int seguro = JOptionPane.showConfirmDialog(
+                    vista,
+                    "¿Está seguro de dar de baja al alumno " + nombreInsc + " de la carrera " + alumno.getCarreraActual().getNombre() + "?\nSe perderán todas sus cursadas activas de forma permanente.",
+                    "Confirmar Baja de Carrera",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (seguro == JOptionPane.YES_OPTION) {
+                alumno.setCarreraActual(null);
+                alumno.getCursadas().clear(); // Vaciamos la lista para no dejar basura en memoria
+
+                JOptionPane.showMessageDialog(vista, "Baja de carrera procesada con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+                // Refrescamos la UI (esto vuelve a dibujar la tabla y actualiza el botón)
+                refrescarTablaPaginada();
+            }
+            return; // Cortamos el flujo acá para que no salte al modo inscripción
         }
 
-        // Si está libre, avanzamos al formulario normalmente
+        // CASO B: EL ALUMNO NO TIENE CARRERA
         esAlta = false;
         esInscripcion = true;
 
-        ArrayList<String> carrerasDisponibles =new ArrayList<>();
-
+        ArrayList<String> carrerasDisponibles = new ArrayList<>();
         ArrayList<Carrera> carreras = new ArrayList<>(modelo.getMapaCarreras().values());
-        for (Carrera c: carreras){
+        for (Carrera c : carreras) {
             carrerasDisponibles.add(c.getNombre());
         }
+
+        // Mostramos el panel/formulario de inscripción pasándole los datos necesarios
         vista.mostrarModoInscripcionCarrera(dniInsc, nombreInsc, carrerasDisponibles);
     }
 
@@ -532,5 +579,8 @@ public class ControladorAlumnos implements ActionListener {
         }
 
         vista.actualizarEtiquetaPaginacion(paginaActual, totalPaginas);
+
+        // actualizamos el boton de Inscribirse Carrera/Dar Baja Carrera ya que la lista cambio
+        actualizarBotonCarreraSegunSeleccion();
     }
 }
