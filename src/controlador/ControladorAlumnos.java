@@ -15,7 +15,7 @@ public class ControladorAlumnos implements ActionListener {
 
     // Variables de control para la paginación
     private int paginaActual = 1;
-    private final int FILAS_POR_PAGINA = 5;
+    private final int FILAS_POR_PAGINA = 10;
 
     // Banderas de estado para el botón "Guardar"
     private boolean esAlta = true;
