@@ -1,6 +1,10 @@
 package modelo;
 
-public class Prerrequisito {
+import java.io.Serializable;
+
+public class Prerrequisito implements Serializable {
+    private static final long serialVersionUID = 18L;
+
     private Materia materiaRequerida;
     private TipoPrerrequisito tipo;
 

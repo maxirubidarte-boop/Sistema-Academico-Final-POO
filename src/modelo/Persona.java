@@ -1,6 +1,11 @@
 package modelo;
 
-public abstract class Persona {
+import java.io.Serializable;
+
+public abstract class Persona implements Serializable {
+
+    private static final long serialVersionUID = 25L;
+
     private String nombre;
     private Integer legajo;
     private String dni;
@@ -17,10 +22,9 @@ public abstract class Persona {
 
     public  String Nombre (){return nombre;}
 
-    //NUEVOOOOOOO NO ESTA EN EL DIAGRAMA
     public String getDni (){return dni;}
 
-    public void setNombre (String nombrel){
+    public void setNombre (String nombre){
         this.nombre = nombre;
     }
 

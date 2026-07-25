@@ -1,8 +1,11 @@
 package modelo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class PlanEstudioBuilder {
+public class PlanEstudioBuilder implements Serializable {
+    private static final long serialVersionUID = 17L;
+
     private ArrayList<Materia> materiasObligatorias = new ArrayList<>();
     private ArrayList<Materia> materiasOptativas = new ArrayList<>();
     private int minObligatorias;

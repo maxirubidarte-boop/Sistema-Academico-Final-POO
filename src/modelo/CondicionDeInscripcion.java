@@ -1,6 +1,10 @@
 package modelo;
 
-public class CondicionDeInscripcion {
+import java.io.Serializable;
+
+public class CondicionDeInscripcion implements Serializable {
+    private static final long serialVersionUID = 15L;
+
     private EstrategiaDeInscripcion estrategia;
 
     public CondicionDeInscripcion (EstrategiaDeInscripcion estrategia){

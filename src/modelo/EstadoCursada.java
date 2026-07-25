@@ -1,6 +1,8 @@
 package modelo;
 
-public interface EstadoCursada {
+import java.io.Serializable;
+
+public interface EstadoCursada extends Serializable {
     void rendirParcial(Cursada cursada,boolean aprueba);
     void rendirPromocion(Cursada cursada);
     void finalizarCursada(Cursada cursada);

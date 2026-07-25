@@ -1,6 +1,8 @@
 package modelo;
 
-public class Inscripto implements EstadoCursada {
+
+public class Inscripto implements EstadoCursada{
+    private static final long serialVersionUID = 7L;
 
     @Override
     public void rendirParcial(Cursada cursada,boolean aprueba) {

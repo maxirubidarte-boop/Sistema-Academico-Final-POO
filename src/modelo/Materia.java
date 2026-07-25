@@ -2,7 +2,11 @@ package modelo;
 
 import java.util.ArrayList;
 
-public class Materia {
+import java.io.Serializable;
+
+public class Materia implements Serializable{
+    private static final long serialVersionUID = 5L;
+
     private String nombre;
     private Integer codigo;
     private int cuatrimestre;

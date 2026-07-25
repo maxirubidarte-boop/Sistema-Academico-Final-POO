@@ -1,6 +1,9 @@
 package modelo;
+import java.io.Serializable;
 
-public class Cursada {
+public class Cursada implements Serializable{
+    private static final long serialVersionUID = 6L;
+
     private Materia materia;
     private Alumno alumno;
     private EstadoCursada estadoActual;

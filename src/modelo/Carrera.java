@@ -3,7 +3,11 @@ package modelo;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Carrera {
+import java.io.Serializable;
+
+public class Carrera implements Serializable{
+    private static final long serialVersionUID = 3L;
+
     private String nombre;
     private Integer codigo;
     private PlanDeEstudio planDeEstudio;

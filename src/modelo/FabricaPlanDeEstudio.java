@@ -1,10 +1,12 @@
 package modelo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class FabricaPlanDeEstudio {
+public class FabricaPlanDeEstudio implements Serializable {
+    private static final long serialVersionUID = 16L;
 
-    // 🔥 CORREGIDO: Ahora recibe un único objeto CondicionDeInscripcion global
+    //  recibe un único objeto CondicionDeInscripcion global
     public PlanDeEstudio crearPlanDeEstudio(
             ArrayList<Materia> obligatorias,
             ArrayList<Materia> optativas,

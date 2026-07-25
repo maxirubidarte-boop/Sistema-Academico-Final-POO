@@ -1,6 +1,7 @@
 package modelo;
 
 public class Promocionada implements EstadoCursada {
+    private static final long serialVersionUID = 10L;
     @Override
     public void rendirParcial(Cursada cursada, boolean aprueba) {
     }

@@ -2,7 +2,11 @@ package modelo;
 
 import java.util.ArrayList;
 
-public class Alumno extends Persona {
+import java.io.Serializable;
+
+public class Alumno extends Persona implements Serializable{
+    private static final long serialVersionUID = 2L;
+
     private ArrayList<Materia> materiasAprobadas;
     private ArrayList<Cursada> cursadas;
     private Carrera carreraActual;

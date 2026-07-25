@@ -1,6 +1,7 @@
 package modelo;
 
 public class ParcialAprobado implements EstadoCursada {
+    private static final long serialVersionUID = 8L;
     @Override
     public void rendirParcial(Cursada cursada,boolean aprueba) {
     }

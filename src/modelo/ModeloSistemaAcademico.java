@@ -3,8 +3,11 @@ package modelo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.Serializable;
 
-public class ModeloSistemaAcademico {
+public class ModeloSistemaAcademico implements Serializable{
+    private static final long serialVersionUID = 1L;
+
     private HashMap<String, Carrera> carreras;
     private HashMap<String, Alumno> padronGeneral;
     private HashMap<Integer, PlanDeEstudio> planesDeEstudio;
@@ -27,6 +30,11 @@ public class ModeloSistemaAcademico {
         }
         return instancia;
         // METODO GETINSTANCIA PARA LA INSTANCIA UNICA
+    }
+
+
+    public static void setInstancia(ModeloSistemaAcademico nuevaInstancia) {
+        instancia = nuevaInstancia;
     }
 
 

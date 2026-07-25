@@ -1,6 +1,7 @@
 package modelo;
 
 public class CursadaDesaprobada implements EstadoCursada {
+    private static final long serialVersionUID = 12L;
     @Override
     public void rendirParcial(Cursada cursada,boolean aprueba) {
         cursada.setNuevoEstado(new ParcialAprobado());

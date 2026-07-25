@@ -3,8 +3,11 @@ package modelo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.Serializable;
 
-public class PlanDeEstudio {
+public class PlanDeEstudio implements Serializable{
+    private static final long serialVersionUID = 4L;
+
     private ArrayList<Materia> materiasObligatorias;
     private ArrayList<Materia> materiasOptativas;
     private int minObligatorias;

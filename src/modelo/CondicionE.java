@@ -1,8 +1,11 @@
 package modelo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class CondicionE extends EstrategiaDeInscripcion {
+public class CondicionE extends EstrategiaDeInscripcion implements Serializable {
+
+    private static final long serialVersionUID = 24L;
 
     public CondicionE (){}
 
