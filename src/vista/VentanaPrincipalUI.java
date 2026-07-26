@@ -51,9 +51,9 @@ public class VentanaPrincipalUI extends JFrame {
         add(contenedorCentral, BorderLayout.CENTER);
     }
 
-    /**
-     * El método estrella: Limpia el centro de la pantalla e inyecta el panel que queramos en caliente.
-     */
+
+      // El método estrella: Limpia el centro de la pantalla e inyecta el panel que queramos en caliente.
+
     public void setPanelCentral(JPanel nuevoPanel) {
         contenedorCentral.removeAll();       // Borra lo que había (la bienvenida u otra sección)
         contenedorCentral.add(nuevoPanel, BorderLayout.CENTER); // Pega el panel nuevo (ej: Alumnos)
@@ -61,9 +61,9 @@ public class VentanaPrincipalUI extends JFrame {
         contenedorCentral.repaint();         // Re-dibuja visualmente la pantalla
     }
 
-    /**
-     * Registra al Controlador Principal para escuchar el menú global
-     */
+
+     // Registra al Controlador Principal para escuchar el menú global
+
     public void escucharMenu(ActionListener listener) {
         btnSeccionAlumnos.addActionListener(listener);
         btnSeccionMaterias.addActionListener(listener);

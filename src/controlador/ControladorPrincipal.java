@@ -25,7 +25,7 @@ public class ControladorPrincipal implements ActionListener {
         String comando = e.getActionCommand();
 
         switch (comando) {
-            case "Sección Alumnos": // 💡 Corregido: Agregamos la tilde para que coincida con el botón
+            case "Sección Alumnos":
                 // 🎬 INYECCIÓN EN CALIENTE DE ALUMNOS
                 PanelAlumnosUI panelAlumnos = new PanelAlumnosUI();
                 ControladorAlumnos ctrlAlumnos = new ControladorAlumnos(panelAlumnos, modelo);
@@ -37,7 +37,7 @@ public class ControladorPrincipal implements ActionListener {
             case "Sección Materias":
                 // 🎬 INYECCIÓN EN CALIENTE DE MATERIAS
                 PanelMateriasUI panelMaterias = new PanelMateriasUI();
-                ControladorMaterias ctrlMaterias = new ControladorMaterias(panelMaterias, modelo); // 💡 Corregido: Se agregó el ';' faltante
+                ControladorMaterias ctrlMaterias = new ControladorMaterias(panelMaterias, modelo);
 
                 // Le encajamos el panel de materias en el centro a la ventana principal
                 ventanaMadre.setPanelCentral(panelMaterias);

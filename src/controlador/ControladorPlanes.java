@@ -27,7 +27,7 @@ public class ControladorPlanes implements ActionListener, ListSelectionListener 
     // Flag para evitar bucles infinitos al actualizar las listas dinámicamente
     private boolean actualizandoListasMutuas = false;
 
-    // 🌟 NUEVO: Flag para saber si el formulario está en modo "Crear" o "Editar"
+    //  Flag para saber si el formulario está en modo "Crear" o "Editar"
     private boolean editando = false;
 
     public ControladorPlanes(PanelPlanesUI vista, ModeloSistemaAcademico modelo) {
@@ -180,7 +180,7 @@ public class ControladorPlanes implements ActionListener, ListSelectionListener 
         }
     }
 
-    // 🌟 NUEVO: Se encarga de buscar el plan seleccionado y pintar el formulario
+    //  Se encarga de buscar el plan seleccionado y pintar el formulario
     private void prepararEdicionDePlan() {
         int filaSel = vista.getTablaPlanes().getSelectedRow();
         if (filaSel == -1) {
@@ -235,7 +235,7 @@ public class ControladorPlanes implements ActionListener, ListSelectionListener 
         }
     }
 
-    // 🌟 LA MAGIA DE EDICIÓN: Prepara las JList con lo que ya está grabado en el plan
+
     private void cargarYPreseleccionarMateriasDelPlan(PlanDeEstudio plan) {
         actualizandoListasMutuas = true;
 
@@ -279,7 +279,7 @@ public class ControladorPlanes implements ActionListener, ListSelectionListener 
         restaurarSeleccion(vista.getListaMateriasOptativas(), vista.getModeloListaOpta(), optativasTextos);
     }
 
-    // 🌟 MODIFICADO: Ahora decide inteligentemente si llama a Crear o Modificar
+
     private void guardarPlan() {
         String codigoStr = vista.getTxtCodigo();
         String nombre = vista.getTxtNombre();
@@ -333,7 +333,7 @@ public class ControladorPlanes implements ActionListener, ListSelectionListener 
 
             boolean exito;
             if (editando) {
-                // 🌟 MODO EDICIÓN:
+                // MODO EDICIÓN:
 
                 exito = modelo.editarPlan(codigo, nombre, minOblig, minOpta, estrategiaInterna, obligatoriasIDs, optativasIDs);
             } else {
@@ -400,6 +400,7 @@ public class ControladorPlanes implements ActionListener, ListSelectionListener 
         }
     }
 
+    // muestra la info de el plan seleccionado de la tabla en tiempo real
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
